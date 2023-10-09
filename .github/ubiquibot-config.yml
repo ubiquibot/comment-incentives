@@ -12,7 +12,7 @@ commandSettings:
     enabled: true
   - name: query
     enabled: true
-  - name: allow
+  - name: labels
     enabled: true
   - name: autopay
     enabled: true
