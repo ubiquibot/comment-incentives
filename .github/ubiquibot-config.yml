@@ -1,4 +1,50 @@
 privateKeyEncrypted: YU-tFJFczN3JPVoJu0pQKSbWoeiCFPjKiTXMoFnJxDDxUNX-BBXc6ZHkcQcHVjdOd6ZcEnU1o2jU3F-i05mGJPmhF2rhQYXkNlxu5U5fZMMcgxJ9INhAmktzRBUxWncg4L1HOalZIoQ7gm3nk1a84g
+
+promotionComment: "<h6>If you've enjoyed your experience in the DevPool, we'd appreciate your support. Follow <a href='https://github.com/ubiquity'>Ubiquity on GitHub</a> and star <a href='https://github.com/ubiquity/devpool-directory'>this repo</a>. Your endorsement means the world to us and helps us grow!</h6><h6>We are excited to announce that the DevPool and UbiquiBot are now available to partners! Our ideal collaborators are globally distributed crypto-native organizations, who actively work on open source on GitHub, and excel in research & development. If you can introduce us to the repository maintainers in these types of companies, we have a special bonus in store for you!</h6>"
+
+evmNetworkId: 100
+priceMultiplier: 1
+issueCreatorMultiplier: 3
+maxConcurrentAssigns: 2
+permitMaxPrice: 1000
+
+disableAnalytics: true
+commentIncentives: true
+assistivePricing: true
+registerWalletWithVerification: false
+
+timeLabels:
+  - name: "Time: <1 Hour"
+  - name: "Time: <2 Hours"
+  - name: "Time: <4 Hours"
+  - name: "Time: <1 Day"
+  - name: "Time: <1 Week"
+
+priorityLabels:
+  - name: "Priority: 1 (Normal)"
+  - name: "Priority: 2 (Medium)"
+  - name: "Priority: 3 (High)"
+  - name: "Priority: 4 (Urgent)"
+  - name: "Priority: 5 (Emergency)"
+
+incentives:
+  comment:
+    elements:
+      code: 1
+      img: 0
+      h1: 1
+      h2: 1
+      h3: 1
+      h4: 1
+      h5: 1
+      h6: 1
+      li: 0.5
+      a: 1
+      blockquote: 0
+      i: 0
+    totals:
+      word: 0.1
+
 commandSettings:
   - name: start
     enabled: true
@@ -12,7 +58,7 @@ commandSettings:
     enabled: true
   - name: query
     enabled: true
-  - name: labels
+  - name: allow
     enabled: true
   - name: autopay
     enabled: true
