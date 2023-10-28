@@ -3,8 +3,8 @@ keys:
 
 # logs:
 #   -
-features:
-  assistivePricing: true
+# features:
+#   assistivePricing: true
 
 # timers:
 #   -
