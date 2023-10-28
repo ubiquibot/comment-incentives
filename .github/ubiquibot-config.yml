@@ -3,8 +3,9 @@ keys:
 
 # logs:
 #   -
-# features:
-#   -
+features:
+  assistivePricing: true
+
 # timers:
 #   -
 payments:
@@ -12,7 +13,6 @@ payments:
   basePriceMultiplier: 1
   issueCreatorMultiplier: 3
   maxPermitPrice: 1000
-  assistivePricing: true
 commands:
   incentives:
     comment:
