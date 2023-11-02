@@ -65,4 +65,5 @@ commandSettings:
   - name: review
     enabled: true
 
-staleTaskTime: 1 month
+assign:
+  staleTaskTime: 1 month
