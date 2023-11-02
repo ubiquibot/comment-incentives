@@ -6,7 +6,7 @@ evmNetworkId: 100
 priceMultiplier: 1
 issueCreatorMultiplier: 3
 maxConcurrentTasks: 2
-permitMaxPrice: 1000
+maxPermitPrice: 1000
 
 disableAnalytics: true
 incentiveMode: true
