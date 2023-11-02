@@ -8,8 +8,6 @@ issueCreatorMultiplier: 3
 maxConcurrentTasks: 2
 maxPermitPrice: 1000
 
-disableAnalytics: true
-incentiveMode: true
 assistivePricing: true
 registerWalletWithVerification: false
 
