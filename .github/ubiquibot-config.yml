@@ -64,3 +64,5 @@ commandSettings:
     enabled: true
   - name: review
     enabled: true
+
+staleTaskTime: 1 month
