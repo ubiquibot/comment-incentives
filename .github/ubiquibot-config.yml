@@ -67,11 +67,7 @@ commands:
     enabled: true
   - name: query
     enabled: true
-  - name: allow
-    enabled: true
   - name: autopay
     enabled: true
   - name: ask
-    enabled: true
-  - name: review
     enabled: true
