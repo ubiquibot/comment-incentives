@@ -4,7 +4,6 @@ keys:
 
 features:
   assistivePricing: true
-  staleTaskTime: 30 days
 
 payments:
   evmNetworkId: 100
