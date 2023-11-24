@@ -1,5 +1,5 @@
-name: "Hello Ubiquity!"
-description: "Ubiquity bridge action"
+name: "Delegate Compute"
+description: "UbiquiBot Delegated Compute Action"
 outputs:
   result: # id of output
     description: "The result of a event handler"
