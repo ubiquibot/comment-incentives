@@ -1,0 +1,43 @@
+name: Bridge workflow
+#get log & tags information
+on:
+  workflow_dispatch:
+    inputs:
+      eventName:
+        description: "name of the received event"
+        required: true
+      owner:
+        description: "name of the owner of organization"
+        required: true
+      repo:
+        description: "name of the repo"
+        required: true
+      issueNumber:
+        description: "issue Number of the event"
+        required: true
+      payload:
+        description: "event payload"
+        required: true
+      secretToken:
+        description: "PAT token for the repo"
+        required: true
+
+jobs:
+  handler-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: print event name
+        run: echo ${{ inputs.eventName }}
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Calling action
+        uses: ./ # Uses an action in the root directory
+        id: Ubiquity_action
+      - name: Trigger repository_dispatch to the repo
+        run: |
+          curl -L \
+          -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H 'Authorization: Bearer ${{ inputs.secretToken }}' \
+          https://api.github.com/repos/${{inputs.owner}}/${{inputs.repo}}/dispatches \
+          -d '{"event_type":"${{ inputs.eventName }}","client_payload":{"result": ${{ steps.Ubiquity_action.outputs.result }}, "issueNumber":"${{ inputs.issueNumber }}"}}'
