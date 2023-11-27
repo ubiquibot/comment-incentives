@@ -6,7 +6,7 @@ import { getPayoutConfigByNetworkId } from "../../helpers/payout";
 import { decryptKeys } from "../../utils/private";
 
 export async function generatePermit2Signature(
-  { beneficiary, amount, userId, config, X25519_PRIVATE_KEY }: GeneratePermit2SignatureParams
+  { beneficiary, amount, userId, config }: GeneratePermit2SignatureParams
 ) {
   const {
     payments: { evmNetworkId },
@@ -15,7 +15,7 @@ export async function generatePermit2Signature(
 
   if (!evmPrivateEncrypted) throw console.warn("No bot wallet private key defined");
   const { rpc, paymentToken } = getPayoutConfigByNetworkId(evmNetworkId);
-  const { privateKey } = await decryptKeys(evmPrivateEncrypted, X25519_PRIVATE_KEY);
+  const { privateKey } = await decryptKeys(evmPrivateEncrypted);
 
   if (!rpc) throw console.error("RPC is not defined");
   if (!privateKey) throw console.error("Private key is not defined");
@@ -96,7 +96,6 @@ interface GeneratePermit2SignatureParams {
 
   userId: string;
   config: any;
-  X25519_PRIVATE_KEY: string;
 }
 
 interface TransactionData {
