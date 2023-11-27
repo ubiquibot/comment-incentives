@@ -1,4 +1,6 @@
-import { Comment } from "../../types/payload";
+import { SupabaseClient } from "@supabase/supabase-js";
+import OpenAI from "openai";
+import { Comment, Issue, User } from '../../types/payload';
 import { generatePermits } from "./generate-permits";
 import { aggregateAndScoreContributions } from "./score-sources";
 import { sumTotalScores } from "./sum-total-scores-per-contributor";
@@ -7,7 +9,7 @@ export const botCommandsAndHumanCommentsFilter = (comment: Comment) =>
   !comment.body.startsWith("/") /* No Commands */ && comment.user.type === "User"; /* No Bots */
 
 
-export async function issueClosed(issue, issueComments, openAi, repoCollaborators, pullRequestComments, config, supabase) {
+export async function issueClosed({ issue, issueComments, openAi, repoCollaborators, pullRequestComments, config, supabase }: IssueClosedParams) {
   const sourceScores = await aggregateAndScoreContributions({
     issue,
     issueComments,
@@ -22,3 +24,5 @@ export async function issueClosed(issue, issueComments, openAi, repoCollaborator
   // 4. return the permit comment
   return permitComment;
 }
+
+interface IssueClosedParams { issue: Issue; issueComments: Comment[]; openAi: OpenAI; repoCollaborators: User[]; pullRequestComments: Comment[]; config: any; supabase: SupabaseClient<any, "public", any>; }

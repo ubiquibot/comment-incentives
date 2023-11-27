@@ -35,13 +35,7 @@ async function run() {
         SUPABASE_KEY
       );
       const result: string = await issueClosed(
-        handlerPayload.issue,
-        handlerPayload.issueComments,
-        new OpenAI({apiKey: process.env.OPENAI_API_KEY}),
-        handlerPayload.repoCollaborators,
-        handlerPayload.pullRequestComments,
-        handlerPayload.botConfig,
-        SUPABASE_CLIENT,
+        { issue: handlerPayload.issue, issueComments: handlerPayload.issueComments, openAi: new OpenAI({ apiKey: process.env.OPENAI_API_KEY }), repoCollaborators: handlerPayload.repoCollaborators, pullRequestComments: handlerPayload.pullRequestComments, config: handlerPayload.botConfig, supabase: SUPABASE_CLIENT },
       );
       const compressedString = zlib.gzipSync(
         Buffer.from(result.replace(/<!--[\s\S]*?-->/g, ""))
