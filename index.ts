@@ -22,11 +22,10 @@ async function run() {
       const result: string = await issueClosed(
         handlerPayload.issue,
         handlerPayload.issueComments,
-        new OpenAI({ apiKey: handlerPayload.openAiKey }),
+        new OpenAI(),
         handlerPayload.repoCollaborators,
         handlerPayload.pullRequestComments,
         handlerPayload.botConfig, 
-        handlerPayload.X25519_PRIVATE_KEY,
         supabase,
       );
       const compressedString = zlib.gzipSync(
