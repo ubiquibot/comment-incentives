@@ -1,9 +1,20 @@
-import { createClient } from "@supabase/supabase-js";
-import zlib from "zlib";
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { issueClosed } from "./handlers//issue/issue-closed";
+import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
+import zlib from "zlib";
+import { issueClosed } from "./handlers//issue/issue-closed";
+
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+
+if(!SUPABASE_URL) {
+  core.setFailed("SUPABASE_URL not set");
+}
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+if(!SUPABASE_KEY) {
+  core.setFailed("SUPABASE_KEY not set");
+}
 
 // Define an asynchronous function to handle the logic
 async function run() {
@@ -15,9 +26,9 @@ async function run() {
     const handlerPayload = JSON.parse(payload.inputs.payload);
 
     if (eventName === "issueClosed") {
-      const supabase = createClient(
-        handlerPayload.supabaseUrl,
-        handlerPayload.supabaseKey
+      const SUPABASE_CLIENT = createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
       );
       const result: string = await issueClosed(
         handlerPayload.issue,
@@ -25,8 +36,8 @@ async function run() {
         new OpenAI(),
         handlerPayload.repoCollaborators,
         handlerPayload.pullRequestComments,
-        handlerPayload.botConfig, 
-        supabase,
+        handlerPayload.botConfig,
+        SUPABASE_CLIENT,
       );
       const compressedString = zlib.gzipSync(
         Buffer.from(result.replace(/<!--[\s\S]*?-->/g, ""))
