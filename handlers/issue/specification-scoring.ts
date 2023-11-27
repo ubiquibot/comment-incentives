@@ -1,7 +1,7 @@
 import Decimal from "decimal.js";
 
 import { Comment, Issue, User } from "../../types/payload";
-import { allCommentScoring } from "./allCommentScoring";
+import { allCommentScoring } from "./all-comment-scoring";
 import { UserScoreDetails } from "./issue-shared-types";
 import { addRelevanceAndFormatScoring } from "./relevance-format-scoring";
 

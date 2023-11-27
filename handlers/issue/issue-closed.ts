@@ -1,7 +1,7 @@
 import { Comment } from "../../types/payload";
 import { generatePermits } from "./generate-permits";
-import { aggregateAndScoreContributions } from "./scoreSources";
-import { sumTotalScores } from "./sumTotalScoresPerContributor";
+import { aggregateAndScoreContributions } from "./score-sources";
+import { sumTotalScores } from "./sum-total-scores-per-contributor";
 
 export const botCommandsAndHumanCommentsFilter = (comment: Comment) =>
   !comment.body.startsWith("/") /* No Commands */ && comment.user.type === "User"; /* No Bots */

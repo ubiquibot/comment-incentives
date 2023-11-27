@@ -1,13 +1,13 @@
 import Decimal from "decimal.js";
 
+import OpenAI from "openai";
 import { Comment, Issue, User } from "../../types/payload";
-import { allCommentScoring } from "./allCommentScoring";
+import { allCommentScoring } from "./all-comment-scoring";
 import { CommentScoring } from "./comment-scoring-rubric";
 import { ContributorView } from "./contribution-style-types";
 import { UserScoreDetails } from "./issue-shared-types";
 import { addRelevanceAndFormatScoring } from "./relevance-format-scoring";
 import { relevanceScoring } from "./relevance-scoring";
-import OpenAI from "openai";
 
 export async function commentsScoring({
   issue,
