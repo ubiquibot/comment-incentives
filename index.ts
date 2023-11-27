@@ -12,12 +12,13 @@ async function run() {
       JSON.stringify(github.context.payload, undefined, 2)
     );
     const eventName = payload.inputs.eventName;
-    const handlerPayload = JSON.parse(payload.inputs.payload);
+    const uncompressedPayload = zlib.gunzipSync(Buffer.from(payload.inputs.payload));
+    const handlerPayload = JSON.parse(uncompressedPayload.toString());
 
     if (eventName === "issueClosed") {
       const supabase = createClient(
-        handlerPayload.supabaseUrl,
-        handlerPayload.supabaseKey
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_KEY
       );
       const result: string = await issueClosed(
         handlerPayload.issue,
