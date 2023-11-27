@@ -32,12 +32,10 @@ export function countTokensOfConversation(issue: Issue, comments: Comment[]) {
   }
 
   const gpt3TurboEncoder = encodingForModel("gpt-3.5-turbo");
-  const contributorCommentsWithTokens = comments.map((comment) => {
-    return {
+  const contributorCommentsWithTokens = comments.map((comment) => ({
       tokens: gpt3TurboEncoder.encode(comment.body),
       comment,
-    };
-  });
+    }));
 
   const sumOfContributorTokens = contributorCommentsWithTokens.reduce((acc, { tokens }) => acc + tokens.length, 0);
   const specificationTokens = gpt3TurboEncoder.encode(specificationComment);
@@ -52,7 +50,7 @@ export async function gptRelevance(
   model: string,
   ISSUE_SPECIFICATION_BODY: string,
   CONVERSATION_STRINGS: string[],
-  ARRAY_LENGTH = CONVERSATION_STRINGS.length,
+  ARRAY_LENGTH = CONVERSATION_STRINGS.length
 ) {
   if (!openAi) throw new Error("OpenAI adapter is not defined");
   const PROMPT = `I need to evaluate the relevance of GitHub contributors' comments to a specific issue specification. Specifically, I'm interested in how much each comment helps to further define the issue specification or contributes new information or research relevant to the issue. Please provide a float between 0 and 1 to represent the degree of relevance. A score of 1 indicates that the comment is entirely relevant and adds significant value to the issue, whereas a score of 0 indicates no relevance or added value. Each contributor's comment is on a new line.\n\nIssue Specification:\n\`\`\`\n${ISSUE_SPECIFICATION_BODY}\n\`\`\`\n\nConversation:\n\`\`\`\n${CONVERSATION_STRINGS.join(
@@ -93,14 +91,14 @@ async function sampleRelevanceScores(
   const batchSamples = [] as Decimal[][];
 
   for (let attempt = 0; attempt < BATCHES; attempt++) {
-    const fetchedSamples = await fetchSamples( {
+    const fetchedSamples = await fetchSamples({
       contributorComments,
       estimatedOptimalModel,
       issue,
       maxConcurrency: BATCH_SIZE,
       openAi,
     });
-    const filteredSamples = filterSamples( fetchedSamples, correctLength);
+    const filteredSamples = filterSamples(fetchedSamples, correctLength);
     const averagedSample = averageSamples(filteredSamples, 10);
     batchSamples.push(averagedSample);
   }
@@ -109,13 +107,17 @@ async function sampleRelevanceScores(
   return average;
 }
 
-async function fetchSamples(
-  { contributorComments, estimatedOptimalModel, issue, maxConcurrency, openAi }: InEachRequestParams
-) {
+async function fetchSamples({
+  contributorComments,
+  estimatedOptimalModel,
+  issue,
+  maxConcurrency,
+  openAi,
+}: InEachRequestParams) {
   const commentsSerialized = contributorComments.map((comment) => comment.body);
   const batchPromises = [];
   for (let i = 0; i < maxConcurrency; i++) {
-    const requestPromise = gptRelevance(openAi,estimatedOptimalModel, issue.body, commentsSerialized);
+    const requestPromise = gptRelevance(openAi, estimatedOptimalModel, issue.body, commentsSerialized);
     batchPromises.push(requestPromise);
   }
   const batchResults = await Promise.all(batchPromises);
@@ -127,7 +129,7 @@ interface InEachRequestParams {
   estimatedOptimalModel: ReturnType<typeof estimateOptimalModel>;
   issue: Issue;
   maxConcurrency: number;
-  openAi: OpenAI,
+  openAi: OpenAI;
 }
 
 function filterSamples(batchResults: number[][], correctLength: number) {

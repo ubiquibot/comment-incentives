@@ -1,10 +1,10 @@
 import Decimal from "decimal.js";
 import { stringify } from "yaml";
 
-import { getPayoutConfigByNetworkId } from "../../helpers/payout";
 import { getTokenSymbol } from "../../helpers/contracts";
-import { Issue } from "../../types/payload";
+import { getPayoutConfigByNetworkId } from "../../helpers/payout";
 import structuredMetadata from "../../shared/structured-metadata";
+import { Issue } from "../../types/payload";
 import { generatePermit2Signature } from "./generate-permit-2-signature";
 import { UserScoreTotals } from "./issue-shared-types";
 
@@ -30,7 +30,9 @@ async function generateComment(totals: TotalsById, issue: Issue, config, supabas
   for (const userId in totals) {
     const userTotals = totals[userId];
     const contributionsOverviewTable = generateContributionsOverview({ [userId]: userTotals }, issue);
-    const conversationIncentivesTable = generateDetailsTable({ [userId]: userTotals });
+    const conversationIncentivesTable = generateDetailsTable({
+      [userId]: userTotals,
+    });
 
     const tokenAmount = userTotals.total;
 
@@ -43,7 +45,7 @@ async function generateComment(totals: TotalsById, issue: Issue, config, supabas
       .from("users")
       .select("*, wallets(*)")
       .filter("id", "eq", parseInt(userId));
-    if(error) throw error
+    if (error) throw error;
 
     const permit = await generatePermit2Signature({
       beneficiary: beneficiaryAddress,

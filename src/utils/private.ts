@@ -2,14 +2,14 @@ import sodium from "libsodium-wrappers";
 const KEY_PREFIX = "HSK_";
 
 export async function decryptKeys(
-  cipherText: string,
+  cipherText: string
 ): Promise<{ privateKey: string; publicKey: string } | { privateKey: null; publicKey: null }> {
   await sodium.ready;
 
   let _public: null | string = null;
   let _private: null | string = null;
 
-  const X25519_PRIVATE_KEY= process.env.X25519_PRIVATE_KEY;
+  const X25519_PRIVATE_KEY = process.env.X25519_PRIVATE_KEY;
 
   if (!X25519_PRIVATE_KEY) {
     console.warn("X25519_PRIVATE_KEY is not defined");

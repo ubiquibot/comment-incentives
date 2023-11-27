@@ -5,9 +5,12 @@ import { keccak256, toUtf8Bytes } from "ethers/lib/utils";
 import { getPayoutConfigByNetworkId } from "../../helpers/payout";
 import { decryptKeys } from "../../utils/private";
 
-export async function generatePermit2Signature(
-  { beneficiary, amount, userId, config }: GeneratePermit2SignatureParams
-) {
+export async function generatePermit2Signature({
+  beneficiary,
+  amount,
+  userId,
+  config,
+}: GeneratePermit2SignatureParams) {
   const {
     payments: { evmNetworkId },
     keys: { evmPrivateEncrypted },
@@ -86,7 +89,10 @@ export async function generatePermit2Signature(
   url.searchParams.append("claim", base64encodedTxData);
   url.searchParams.append("network", evmNetworkId.toString());
 
-  console.info("Generated permit2 signature", { transactionData, url: url.toString() });
+  console.info("Generated permit2 signature", {
+    transactionData,
+    url: url.toString(),
+  });
 
   return { transactionData, url };
 }

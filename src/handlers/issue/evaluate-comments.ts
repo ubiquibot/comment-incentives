@@ -25,7 +25,12 @@ export async function commentsScoring({
   const relevance = await relevanceScoring(issue, source, openAi);
   const relevanceWithMetaData = relevance.score.map(enrichRelevanceData(source));
 
-  const formatting: CommentScoring[] = await allCommentScoring({issue, comments: source, view, repoCollaborators });
+  const formatting: CommentScoring[] = await allCommentScoring({
+    issue,
+    comments: source,
+    view,
+    repoCollaborators,
+  });
   const formattingWithRelevance: CommentScoring[] = addRelevanceAndFormatScoring(relevanceWithMetaData, formatting);
 
   const userScoreDetails = formattingWithRelevance.reduce((acc, commentScoring) => {
