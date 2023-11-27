@@ -12,7 +12,11 @@ export async function specificationScoring({
   issue,
   view,
   repoCollaborators,
-}: {issue: Issue, view: ContributorView, repoCollaborators:User[] }): Promise<UserScoreDetails[]> {
+}: {
+  issue: Issue;
+  view: ContributorView;
+  repoCollaborators: User[];
+}): Promise<UserScoreDetails[]> {
   // const logger = Runtime.getState().logger;
   const userScoreDetails = [] as UserScoreDetails[];
 
@@ -21,7 +25,12 @@ export async function specificationScoring({
   // synthetic relevance score
   const RELEVANT = [{ comment: issueAsComment, user: issue.user, score: new Decimal(1) }];
 
-  const formatting = await allCommentScoring({ issue, comments: [issueAsComment], view, repoCollaborators });
+  const formatting = await allCommentScoring({
+    issue,
+    comments: [issueAsComment],
+    view,
+    repoCollaborators,
+  });
   const scoreDetails = addRelevanceAndFormatScoring(RELEVANT, formatting);
   for (const user in scoreDetails) {
     const userScore = scoreDetails[user];

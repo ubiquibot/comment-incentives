@@ -54,7 +54,10 @@ export class CommentScoring {
 
   private _formatConfig: { [tagName in Tags]?: FormatScoreConfigParams } = {
     img: new FormatScoreConfig({ element: "img", disabled: true }), // disabled
-    blockquote: new FormatScoreConfig({ element: "blockquote", disabled: true }), // disabled
+    blockquote: new FormatScoreConfig({
+      element: "blockquote",
+      disabled: true,
+    }), // disabled
     em: new FormatScoreConfig({ element: "em", disabled: true }), // disabled
     strong: new FormatScoreConfig({ element: "strong", disabled: true }), // disabled
 

@@ -3,7 +3,7 @@ import * as github from "@actions/github";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import zlib from "zlib";
-import { issueClosed } from "./handlers//issue/issue-closed";
+import { issueClosed } from "./src/handlers/issue/issue-closed";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 if (!OPENAI_API_KEY) {

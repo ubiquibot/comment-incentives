@@ -3,17 +3,15 @@ import { Issue, User } from "../../types/payload";
 import { ContributorView } from "./contribution-style-types";
 import { UserScoreDetails } from "./issue-shared-types";
 
-export async function assigneeScoring(
-  {
-    issue,
-    source,
-    view,
-  }: {
-    issue: Issue;
-    source: User[];
-    view: ContributorView;
-  }
-): Promise<UserScoreDetails[]> {
+export async function assigneeScoring({
+  issue,
+  source,
+  view,
+}: {
+  issue: Issue;
+  source: User[];
+  view: ContributorView;
+}): Promise<UserScoreDetails[]> {
   // get the price label
   const priceLabels = issue.labels.filter((label) => label.name.startsWith("Price: "));
   if (!priceLabels) throw console.warn("Price label is undefined");

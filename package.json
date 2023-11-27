@@ -1,25 +1,43 @@
 {
   "main": "index.ts",
   "scripts": {
-    "start": "tsx index.ts"
+    "start": "tsx index.ts",
+    "preformat": "yarn lint:prettier",
+    "format": "yarn lint:eslint",
+    "lint": "yarn lint:prettier:check && yarn lint:eslint",
+    "lint:prettier:check": "prettier -c src/**/*.ts",
+    "lint:prettier": "prettier --write src",
+    "lint:eslint": "eslint --fix --ext .ts ./src",
+    "utils:cspell": "cspell --config .cspell.json 'src/**/*.{js,ts,json,md,yml}'",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@actions/core": "^1.10.1",
     "@actions/github": "^6.0.0",
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
     "@openzeppelin/contracts": "^5.0.0",
     "@sinclair/typebox": "^0.31.20",
     "@supabase/supabase-js": "^2.38.4",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
     "@uniswap/permit2-sdk": "^1.2.0",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
     "decimal.js": "^10.4.3",
+    "eslint": "^8.54.0",
     "ethers": "^5.7.2",
+    "husky": "^8.0.3",
     "js-tiktoken": "^1.0.7",
     "jsdom": "^22.1.0",
     "libsodium-wrappers": "^0.7.13",
+    "lint-staged": "^15.1.0",
     "lodash": "^4.17.21",
     "markdown-it": "^13.0.2",
+    "nodemon": "^3.0.1",
+    "npm-run-all": "^4.1.5",
     "openai": "^4.14.0",
+    "prettier": "^3.1.0",
     "tsx": "^4.4.0",
     "typescript": "^5.2.2",
     "yaml": "^2.3.3",
@@ -27,5 +45,25 @@
   },
   "devDependencies": {
     "@types/node": "^20.8.9"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "yarn format"
+    ],
+    "src/**.{ts,json}": [
+      "cspell"
+    ]
+  },
+  "nodemonConfig": {
+    "events": {
+      "config": "",
+      "exit": "",
+      "crash": "",
+      "restart": "clear && printf '\\033[3J'",
+      "start": "clear && printf '\\033[3J'"
+    },
+    "verbose": true,
+    "ext": "ts",
+    "exec": "yarn start"
   }
 }

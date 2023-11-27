@@ -1,4 +1,3 @@
-
 // available tokens for payouts
 export const PAYMENT_TOKEN_PER_NETWORK: Record<string, { rpc: string; token: string }> = {
   "1": {

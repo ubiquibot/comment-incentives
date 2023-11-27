@@ -4,9 +4,13 @@ import { ContributorClasses } from "./contribution-style-types";
 export async function sortUsersByClass(
   issue: Issue,
   contributorComments: Comment[],
-  repoCollaborators: User[],
+  repoCollaborators: User[]
 ): Promise<ContributorClasses> {
-  const { issuer, assignees, collaborators, contributors } = await filterUsers(issue, contributorComments, repoCollaborators);
+  const { issuer, assignees, collaborators, contributors } = await filterUsers(
+    issue,
+    contributorComments,
+    repoCollaborators
+  );
 
   return returnValues(issuer, assignees, collaborators, contributors);
 }

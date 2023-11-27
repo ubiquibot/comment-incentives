@@ -13,7 +13,11 @@ export async function aggregateAndScoreContributions({
   openAi,
   pullRequestComments,
 }: ScoreParams): Promise<UserScoreDetails[]> {
-  const issueIssuerSpecification = await issuerSpecificationScoring({ issue, view: "Issue",repoCollaborators });
+  const issueIssuerSpecification = await issuerSpecificationScoring({
+    issue,
+    view: "Issue",
+    repoCollaborators,
+  });
 
   const issueAssigneeTask = await assigneeTaskScoring({
     issue,

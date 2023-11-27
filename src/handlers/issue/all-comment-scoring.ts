@@ -11,7 +11,12 @@ export async function allCommentScoring({
   comments,
   view,
   repoCollaborators,
-}:  {issue:Issue, comments: Comment[]; view: ContributorView, repoCollaborators: User[] }): Promise<CommentScoring[]> {
+}: {
+  issue: Issue;
+  comments: Comment[];
+  view: ContributorView;
+  repoCollaborators: User[];
+}): Promise<CommentScoring[]> {
   const usersByClass = await sortUsersByClass(issue, comments, repoCollaborators);
   const commentsByClass = sortCommentsByClass(usersByClass, comments, view);
   const contributionClasses = Object.keys(usersByClass).map((key) => key as ContributorClassesKeys);
