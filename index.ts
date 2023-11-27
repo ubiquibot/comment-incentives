@@ -5,14 +5,18 @@ import OpenAI from "openai";
 import zlib from "zlib";
 import { issueClosed } from "./handlers//issue/issue-closed";
 
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+if (!OPENAI_API_KEY) {
+  core.setFailed("OPENAI_API_KEY not set");
+}
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 
-if(!SUPABASE_URL) {
+if (!SUPABASE_URL) {
   core.setFailed("SUPABASE_URL not set");
 }
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
-if(!SUPABASE_KEY) {
+if (!SUPABASE_KEY) {
   core.setFailed("SUPABASE_KEY not set");
 }
 
@@ -20,7 +24,7 @@ if(!SUPABASE_KEY) {
 async function run() {
   try {
     const payload = JSON.parse(
-      JSON.stringify(github.context.payload, undefined, 2)
+      JSON.stringify(github.context.payload, null, 2)
     );
     const eventName = payload.inputs.eventName;
     const handlerPayload = JSON.parse(payload.inputs.payload);
@@ -33,7 +37,7 @@ async function run() {
       const result: string = await issueClosed(
         handlerPayload.issue,
         handlerPayload.issueComments,
-        new OpenAI(),
+        new OpenAI({apiKey: process.env.OPENAI_API_KEY}),
         handlerPayload.repoCollaborators,
         handlerPayload.pullRequestComments,
         handlerPayload.botConfig,
