@@ -1,7 +1,7 @@
 {
-  "main": "index.ts",
+  "main": "src/index.ts",
   "scripts": {
-    "start": "tsx index.ts",
+    "start": "tsx src/index.ts",
     "preformat": "yarn lint:prettier",
     "format": "yarn lint:eslint",
     "lint": "yarn lint:prettier:check && yarn lint:eslint",
