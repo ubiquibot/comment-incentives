@@ -23,11 +23,11 @@ export enum GitHubEvent {
   ISSUES_REOPENED = "issues.reopened",
 
   // issue_comment
-  ISSUE_COMMENT_CREATED = "issue_commenType.created",
-  ISSUE_COMMENT_EDITED = "issue_commenType.edited",
+  ISSUE_COMMENT_CREATED = "issue_comment.created",
+  ISSUE_COMMENT_EDITED = "issue_comment.edited",
 
   // pull_request
-  PULL_REQUEST_OPENED = "pull_requesType.opened",
+  PULL_REQUEST_OPENED = "pull_request.opened",
 
   // installation event
   INSTALLATION_ADDED_EVENT = "installation_repositories.added",
