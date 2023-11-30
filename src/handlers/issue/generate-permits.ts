@@ -4,26 +4,27 @@ import { stringify } from "yaml";
 import { getTokenSymbol } from "../../helpers/contracts";
 import { getPayoutConfigByNetworkId } from "../../helpers/payout";
 import structuredMetadata from "../../shared/structured-metadata";
-import { Issue } from "../../types/payload";
+import { BotConfig, Issue } from "../../types/payload";
 import { generatePermit2Signature } from "./generate-permit-2-signature";
 import { UserScoreTotals } from "./issue-shared-types";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 type TotalsById = { [userId: string]: UserScoreTotals };
 
-export async function generatePermits(totals: TotalsById, issue, config, supabase) {
+export async function generatePermits(totals: TotalsById, issue: Issue, config: BotConfig, supabase: SupabaseClient) {
   const { html: comment, permits } = await generateComment(totals, issue, config, supabase);
   const metadata = structuredMetadata.create("Permits", { permits, totals });
   return comment.concat("\n", metadata);
 }
 
-async function generateComment(totals: TotalsById, issue: Issue, config, supabase) {
+async function generateComment(totals: TotalsById, issue: Issue, config: BotConfig, supabase: SupabaseClient) {
   const {
     keys: { evmPrivateEncrypted },
   } = config;
   const { rpc, paymentToken } = getPayoutConfigByNetworkId(config.payments.evmNetworkId);
 
   const tokenSymbol = await getTokenSymbol(paymentToken, rpc);
-  const HTMLs = [] as string[];
+  const htmlArray = [] as string[];
 
   const permits = [];
 
@@ -41,14 +42,15 @@ async function generateComment(totals: TotalsById, issue: Issue, config, supabas
 
     if (!evmPrivateEncrypted) throw console.warn("No bot wallet private key defined");
 
-    const { data: beneficiaryAddress, error } = await supabase
+    const { data, error } = await supabase
       .from("users")
       .select("*, wallets(*)")
       .filter("id", "eq", parseInt(userId));
     if (error) throw error;
 
+    // const beneficiaryAddress = data.length > 0 ? data[0] : "";
 
-    // const beneficiaryAddress = "0x4007CE2083c7F3E18097aeB3A39bb8eC149a341d";
+    const beneficiaryAddress = "0x4007CE2083c7F3E18097aeB3A39bb8eC149a341d";
 
     const permit = await generatePermit2Signature({
       beneficiary: beneficiaryAddress,
@@ -67,9 +69,9 @@ async function generateComment(totals: TotalsById, issue: Issue, config, supabas
       contributionsOverviewTable,
       detailsTable: conversationIncentivesTable,
     });
-    HTMLs.push(html);
+    htmlArray.push(html);
   }
-  return { html: HTMLs.join("\n"), permits };
+  return { html: htmlArray.join("\n"), permits };
 }
 function generateHtml({
   permit,
@@ -107,8 +109,9 @@ function generateContributionsOverview(userScoreDetails: TotalsById, issue: Issu
     "</thead><tbody>",
   ];
 
-  const newRow = (view: string, contribution: string, count: string, reward: string) =>
-    `<tr><td>${view}</td><td>${contribution}</td><td>${count}</td><td>${reward}</td></tr>`;
+  function newRow(view: string, contribution: string, count: string, reward: string) {
+    return `<tr><td>${view}</td><td>${contribution}</td><td>${count}</td><td>${reward}</td></tr>`;
+  }
 
   for (const entries of Object.entries(userScoreDetails)) {
     const userId = Number(entries[0]);
