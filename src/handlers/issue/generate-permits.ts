@@ -42,11 +42,11 @@ async function generateComment(totals: TotalsById, issue: Issue, config: BotConf
 
     if (!evmPrivateEncrypted) throw console.warn("No bot wallet private key defined");
 
-    const { data, error } = await supabase
-      .from("users")
-      .select("*, wallets(*)")
-      .filter("id", "eq", parseInt(userId));
-    if (error) throw error;
+    // const { data, error } = await supabase
+    //   .from("users")
+    //   .select("*, wallets(*)")
+    //   .filter("id", "eq", parseInt(userId));
+    // if (error) throw error;
 
     // const beneficiaryAddress = data.length > 0 ? data[0] : "";
 
