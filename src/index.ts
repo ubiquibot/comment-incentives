@@ -5,6 +5,7 @@ import OpenAI from "openai";
 import zlib from "zlib";
 import { checkEnvironmentVariables } from "./check-env";
 import { issueClosed } from "./handlers/issue/issue-closed";
+import { IssueClosedEventPayload } from "./types/payload";
 // import cloneDeep from "lodash/cloneDeep";
 
 run()
@@ -27,7 +28,7 @@ async function run() {
   }
 }
 
-async function issueClosedEventHandler(supabaseUrl: string, supabaseKey: string, payload: any) {
+async function issueClosedEventHandler(supabaseUrl: string, supabaseKey: string, payload: IssueClosedEventPayload) {
   const SUPABASE_CLIENT = createClient(supabaseUrl, supabaseKey);
   const result: string = await issueClosed({
     issue: payload.issue,

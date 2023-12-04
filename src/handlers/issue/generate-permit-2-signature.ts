@@ -4,6 +4,7 @@ import { BigNumber, ethers } from "ethers";
 import { keccak256, toUtf8Bytes } from "ethers/lib/utils";
 import { getPayoutConfigByNetworkId } from "../../helpers/payout";
 import { decryptKeys } from "../../utils/private";
+import { BotConfig } from "../../types/payload";
 
 export async function generatePermit2Signature({
   beneficiary,
@@ -101,7 +102,7 @@ interface GeneratePermit2SignatureParams {
   amount: Decimal;
 
   userId: string;
-  config: any;
+  config: BotConfig;
 }
 
 interface TransactionData {
