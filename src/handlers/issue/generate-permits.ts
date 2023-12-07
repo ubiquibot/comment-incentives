@@ -44,6 +44,8 @@ async function generateComment(totals: TotalsById, issue: Issue, config: BotConf
 
     const { data, error } = await supabase.from("users").select("*, wallets(*)").filter("id", "eq", parseInt(userId));
     if (error) throw error;
+    
+    console.log("Beneficiary: !!!!!!!", data);
 
     const beneficiaryAddress = data.length > 0 ? data[0] : "";
 
