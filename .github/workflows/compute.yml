@@ -27,6 +27,11 @@ jobs:
         run: echo ${{ inputs.eventName }}
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.19.0'
+          cache: 'npm'
       - name: Calling action
         uses: ./ # Uses an action in the root directory
         id: callback
