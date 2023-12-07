@@ -47,8 +47,6 @@ async function generateComment(totals: TotalsById, issue: Issue, config: BotConf
 
     const beneficiaryAddress = data.length > 0 ? data[0].wallets.address : "";
 
-    // const beneficiaryAddress = "0x4007CE2083c7F3E18097aeB3A39bb8eC149a341d";
-
     const permit = await generatePermit2Signature({
       beneficiary: beneficiaryAddress,
       amount: tokenAmount,
