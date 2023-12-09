@@ -229,7 +229,7 @@ function generateDetailsTable(totals: TotalsById) {
     }
   }
   if (tableRows === "") return "";
-  return `<table><tbody><tr><td>Comment</td><td>Formatting</td><td>Relevance</td><td>Reward</td></tr>${tableRows}</tbody></table>`;
+  return `<h6>Conversation Incentives</h6><table><thead><tr><th>Comment</th><th>Formatting</th><th>Relevance</th><th>Reward</th></tr></thead><tbody>${tableRows}</tbody></table>`;
 }
 
 function zeroToHyphen(value: number | Decimal) {
