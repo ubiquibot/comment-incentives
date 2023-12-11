@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { Comment, Issue, User } from "../../types/payload";
+import { GitHubComment, GitHubIssue, GitHubUser } from "../../types/payload";
 import { assigneeScoring as assigneeTaskScoring } from "./assignee-scoring";
 import { commentsScoring } from "./evaluate-comments";
 import { botCommandsAndHumanCommentsFilter } from "./issue-closed";
@@ -21,7 +21,7 @@ export async function aggregateAndScoreContributions({
 
   const issueAssigneeTask = await assigneeTaskScoring({
     issue,
-    source: issue.assignees.filter((assignee): assignee is User => Boolean(assignee)),
+    source: issue.assignees.filter((assignee): assignee is GitHubUser => Boolean(assignee)),
     view: "Issue",
   });
 
@@ -48,11 +48,11 @@ export async function aggregateAndScoreContributions({
 }
 
 interface ScoreParams {
-  issue: Issue;
-  issueComments: Comment[];
-  repoCollaborators: User[];
+  issue: GitHubIssue;
+  issueComments: GitHubComment[];
+  repoCollaborators: GitHubUser[];
   openAi: OpenAI;
-  pullRequestComments: Comment[];
+  pullRequestComments: GitHubComment[];
 }
 
 // different ways to earn:

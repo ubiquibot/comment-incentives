@@ -1,12 +1,12 @@
-import { Comment, User } from "../../types/payload";
+import { GitHubComment, GitHubUser } from "../../types/payload";
 import { ContributorClasses, ContributorClassesKeys, ContributorView } from "./contribution-style-types";
 type CommentsSortedByClass = {
-  [className in keyof ContributorClasses]: null | Comment[];
+  [className in keyof ContributorClasses]: null | GitHubComment[];
 };
 
 export function sortCommentsByClass(
   usersByClass: ContributorClasses,
-  contributorComments: Comment[],
+  contributorComments: GitHubComment[],
   view: ContributorView
 ): CommentsSortedByClass {
   const result = {} as CommentsSortedByClass;
@@ -26,13 +26,13 @@ export function sortCommentsByClass(
 function filterComments(
   role: ContributorClassesKeys,
   usersOfCommentsByRole: ContributorClasses,
-  contributorComments: Comment[]
-): Comment[] | null {
+  contributorComments: GitHubComment[]
+): GitHubComment[] | null {
   const users = usersOfCommentsByRole[role];
   if (!users) return null;
   if (Array.isArray(users)) {
-    return contributorComments.filter((comment: Comment) => users.some((user: User) => user.id == comment.user.id));
+    return contributorComments.filter((comment: GitHubComment) => users.some((user: GitHubUser) => user.id == comment.user.id));
   } else {
-    return contributorComments.filter((comment: Comment) => comment.user.id === users.id);
+    return contributorComments.filter((comment: GitHubComment) => comment.user.id === users.id);
   }
 }

@@ -1,9 +1,9 @@
 import Decimal from "decimal.js";
 import { encodingForModel } from "js-tiktoken";
 import OpenAI from "openai";
-import { Comment, Issue } from "../../types/payload";
+import { GitHubComment, GitHubIssue } from "../../types/payload";
 
-export async function relevanceScoring(issue: Issue, contributorComments: Comment[], openAi: OpenAI) {
+export async function relevanceScoring(issue: GitHubIssue, contributorComments: GitHubComment[], openAi: OpenAI) {
   const tokens = countTokensOfConversation(issue, contributorComments);
   const estimatedOptimalModel = estimateOptimalModel(tokens);
   const score = await sampleRelevanceScores(contributorComments, estimatedOptimalModel, issue, openAi);
@@ -25,7 +25,7 @@ export function estimateOptimalModel(sumOfTokens: number) {
   }
 }
 
-export function countTokensOfConversation(issue: Issue, comments: Comment[]) {
+export function countTokensOfConversation(issue: GitHubIssue, comments: GitHubComment[]) {
   const specificationComment = issue.body;
   if (!specificationComment) {
     throw new Error("Issue specification comment is missing");
@@ -80,9 +80,9 @@ export async function gptRelevance(
 }
 
 async function sampleRelevanceScores(
-  contributorComments: Comment[],
+  contributorComments: GitHubComment[],
   estimatedOptimalModel: ReturnType<typeof estimateOptimalModel>,
-  issue: Issue,
+  issue: GitHubIssue,
   openAi: OpenAI
 ) {
   const BATCH_SIZE = 10;
@@ -125,9 +125,9 @@ async function fetchSamples({
 }
 
 interface InEachRequestParams {
-  contributorComments: Comment[];
+  contributorComments: GitHubComment[];
   estimatedOptimalModel: ReturnType<typeof estimateOptimalModel>;
-  issue: Issue;
+  issue: GitHubIssue;
   maxConcurrency: number;
   openAi: OpenAI;
 }

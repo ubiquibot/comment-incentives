@@ -1,5 +1,5 @@
 import Decimal from "decimal.js";
-import { Issue, User } from "../../types/payload";
+import { GitHubIssue, GitHubUser } from "../../types/payload";
 import { ContributorView } from "./contribution-style-types";
 import { UserScoreDetails } from "./issue-shared-types";
 
@@ -8,8 +8,8 @@ export async function assigneeScoring({
   source,
   view,
 }: {
-  issue: Issue;
-  source: User[];
+  issue: GitHubIssue;
+  source: GitHubUser[];
   view: ContributorView;
 }): Promise<UserScoreDetails[]> {
   // get the price label
