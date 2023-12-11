@@ -503,17 +503,3 @@ export type OrganizationPayload = {
     site_admin: boolean;
   };
 };
-
-export interface IssueClosedEventPayload {
-  // issue: GitHubIssue;
-  // issueComments: GitHubComment[];
-  // repoCollaborators: GitHubUser[];
-  // pullRequestComments: GitHubComment[];
-
-
-  issueOwner: string;
-  issueRepository: string;
-  issueNumber: number;
-  botConfig: BotConfig;
-  supabase: SupabaseClient;
-}
