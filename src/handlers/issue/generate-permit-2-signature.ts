@@ -74,6 +74,7 @@ export async function generatePermit2Signature({
     },
     owner: adminWallet.address,
     signature: signature,
+    networkId: evmNetworkId,
   };
 
   // const transactionDataV2 = {
@@ -84,18 +85,9 @@ export async function generatePermit2Signature({
   //   amount: permitTransferFromData.permitted.amount.toString(),
   // };
 
-  const base64encodedTxData = Buffer.from(JSON.stringify(transactionData)).toString("base64");
+  console.info("Generated permit2 signature", transactionData);
 
-  const url = new URL("https://pay.ubq.fi/");
-  url.searchParams.append("claim", base64encodedTxData);
-  url.searchParams.append("network", evmNetworkId.toString());
-
-  console.info("Generated permit2 signature", {
-    transactionData,
-    url: url.toString(),
-  });
-
-  return { transactionData, url };
+  return transactionData;
 }
 interface GeneratePermit2SignatureParams {
   beneficiary: string;
@@ -120,4 +112,5 @@ interface TransactionData {
   };
   owner: string;
   signature: string;
+  networkId: number;
 }

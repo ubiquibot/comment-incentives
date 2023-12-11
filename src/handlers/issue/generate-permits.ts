@@ -8,6 +8,7 @@ import { BotConfig, Issue } from "../../types/payload";
 import { generatePermit2Signature } from "./generate-permit-2-signature";
 import { UserScoreTotals } from "./issue-shared-types";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { generateNftMintSignature } from "./generate-nft-mint-signature";
 
 type TotalsById = { [userId: string]: UserScoreTotals };
 
@@ -20,6 +21,7 @@ export async function generatePermits(totals: TotalsById, issue: Issue, config: 
 async function generateComment(totals: TotalsById, issue: Issue, config: BotConfig, supabase: SupabaseClient) {
   const {
     keys: { evmPrivateEncrypted },
+    features: { isNftRewardEnabled },
   } = config;
   const { rpc, paymentToken } = getPayoutConfigByNetworkId(config.payments.evmNetworkId);
 
@@ -56,8 +58,30 @@ async function generateComment(totals: TotalsById, issue: Issue, config: BotConf
 
     permits.push(permit);
 
+    const nftMints = [];
+    if (isNftRewardEnabled && userTotals.details.length > 0) {
+      const contributionType = `${userTotals.details[0].view} ${userTotals.details[0].role} ${userTotals.details[0].contribution}`;
+      const nftMint = await generateNftMintSignature(
+        issue.repository_url.split("github.com/")[1].split("/")[1],
+        issue.repository_url.split("github.com/")[1].split("/")[2],
+        issue.number.toString(),
+        beneficiaryAddress,
+        contributorName,
+        contributionType
+      );
+      nftMints.push(nftMint);
+    }
+
+    const claimData = {
+      permits: [permit],
+      nftMints,
+    };
+    const base64encodedClaimData = Buffer.from(JSON.stringify(claimData)).toString("base64");
+    const claimUrl = new URL("https://pay.ubq.fi/");
+    claimUrl.searchParams.append("claim", base64encodedClaimData);
+
     const html = generateHtml({
-      permit: permit.url,
+      claimUrl,
       tokenAmount,
       tokenSymbol,
       contributorName,
@@ -69,7 +93,7 @@ async function generateComment(totals: TotalsById, issue: Issue, config: BotConf
   return { html: htmlArray.join("\n"), permits };
 }
 function generateHtml({
-  permit,
+  claimUrl,
   tokenAmount,
   tokenSymbol,
   contributorName,
@@ -82,7 +106,7 @@ function generateHtml({
       <b
         ><h3>
           <a
-            href="${permit.toString()}"
+            href="${claimUrl.toString()}"
           >
             [ ${tokenAmount} ${tokenSymbol} ]</a
           >
@@ -241,7 +265,7 @@ function zeroToHyphen(value: number | Decimal) {
 }
 
 interface GenerateHtmlParams {
-  permit: URL;
+  claimUrl: URL;
   tokenAmount: Decimal;
   tokenSymbol: string;
   contributorName: string;
