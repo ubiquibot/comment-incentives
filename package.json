@@ -19,7 +19,7 @@
     "@octokit/rest": "^20.0.2",
     "@openzeppelin/contracts": "^5.0.0",
     "@sinclair/typebox": "^0.31.20",
-    "@supabase/supabase-js": "^2.38.4",
+    "@supabase/supabase-js": "^2.39.0",
     "@typescript-eslint/eslint-plugin": "^6.12.0",
     "@typescript-eslint/parser": "^6.12.0",
     "@uniswap/permit2-sdk": "^1.2.0",
@@ -31,10 +31,11 @@
     "ethers": "^5.7.2",
     "husky": "^8.0.3",
     "js-tiktoken": "^1.0.7",
-    "jsdom": "^22.1.0",
+    "jsdom": "^23.0.1",
     "libsodium-wrappers": "^0.7.13",
     "lint-staged": "^15.1.0",
-    "markdown-it": "^13.0.2",
+    "lodash": "^4.17.21",
+    "markdown-it": "^14.0.0",
     "node-html-parser": "^6.1.11",
     "nodemon": "^3.0.1",
     "npm-run-all": "^4.1.5",
@@ -47,8 +48,12 @@
     "zlib": "^1.0.5"
   },
   "devDependencies": {
+    "@types/jsdom": "^21.1.6",
     "@types/libsodium-wrappers": "^0.7.13",
-    "@types/node": "^20.8.9"
+    "@types/lodash": "^4.14.202",
+    "@types/markdown-it": "^13.0.7",
+    "@types/node": "^20.8.9",
+    "@types/pino-std-serializers": "^4.0.0"
   },
   "lint-staged": {
     "*.ts": [

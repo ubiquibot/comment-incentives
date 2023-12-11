@@ -505,10 +505,15 @@ export type OrganizationPayload = {
 };
 
 export interface IssueClosedEventPayload {
-  issue: GitHubIssue;
-  issueComments: GitHubComment[];
-  repoCollaborators: GitHubUser[];
-  pullRequestComments: GitHubComment[];
+  // issue: GitHubIssue;
+  // issueComments: GitHubComment[];
+  // repoCollaborators: GitHubUser[];
+  // pullRequestComments: GitHubComment[];
+
+
+  issueOwner: string;
+  issueRepository: string;
+  issueNumber: number;
   botConfig: BotConfig;
   supabase: SupabaseClient;
 }

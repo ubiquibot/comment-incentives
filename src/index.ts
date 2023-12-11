@@ -4,7 +4,6 @@ import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import zlib from "zlib";
 import { checkEnvironmentVariables } from "./check-env";
-import { getPullRequestComments } from "./handlers/issue/get-issue-comments";
 import { issueClosed } from "./handlers/issue/issue-closed";
 import { GitHubComment, GitHubIssue, GitHubUser, IssueClosedEventPayload } from "./types/payload";
 
@@ -29,12 +28,13 @@ async function run() {
 }
 
 async function issueClosedEventHandler(supabaseClient: SupabaseClient, payload: IssueClosedEventPayload) {
-  const result: string = await issueClosed({
-    // issue: payload.issue,
-    // issueComments: payload.issueComments,
-    // repoCollaborators: payload.repoCollaborators,
-    // pullRequestComments: await getPullRequestComments(owner, repository, issueNumber),
 
+
+  const result: string = await issueClosed({
+    issue,
+    issueComments,
+    pullRequestComments,
+    repoCollaborators,
     openAi: new OpenAI({ apiKey: process.env.OPENAI_API_KEY }),
     config: payload.botConfig,
     supabase: supabaseClient,
@@ -44,15 +44,7 @@ async function issueClosedEventHandler(supabaseClient: SupabaseClient, payload: 
   return compressedString.toJSON();
 }
 
-function getIssue(owner: string, repository: string, issueNumber: number): GitHubIssue {
-  // @TODO: fill this out
-}
-function getIssueComments(issue: GitHubIssue): GitHubComment[] {
-  // @TODO: fill this out
-}
-function getPullRequestComments(issue: GitHubIssue): GitHubComment[] {
-  // @TODO: fill this out
-}
-function getRepoCollaborators(repository: GitHubRepository): GitHubUser[] {
-  // @TODO: fill this out
-}
+async function getIssue(owner: string, repository: string, issueNumber: number): Promise<GitHubIssue> {}
+async function getIssueComments(issue: GitHubIssue): Promise<GitHubComment[]> {}
+async function getPullRequestComments(issue: GitHubIssue): Promise<GitHubComment[]> {}
+async function getRepoCollaborators(issue: GitHubIssue): Promise<GitHubUser[]> {}
