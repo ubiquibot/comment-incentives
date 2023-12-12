@@ -1,7 +1,8 @@
 // https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads
 
-import { Type, Static, TProperties, ObjectOptions, StaticDecode } from "@sinclair/typebox";
+import { ObjectOptions, Static, StaticDecode, TProperties, Type } from "@sinclair/typebox";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { validHTMLElements } from "../handlers/issue/valid-html-elements";
 
 const labelSchema = Type.Object({
   id: Type.Number(),
@@ -98,7 +99,7 @@ const userSchema = Type.Object({
 //   }),
 // ]);
 
-export type User = Static<typeof userSchema>;
+export type GitHubUser = Static<typeof userSchema>;
 // type UserProfile= Static<typeof UserProfileSchema>;
 export enum AuthorAssociation {
   OWNER = "OWNER",
@@ -144,7 +145,7 @@ const issueSchema = Type.Object({
   // NONE: The author does not have any specific association with the repository.
 });
 
-export type Issue = Static<typeof issueSchema>;
+export type GitHubIssue = Static<typeof issueSchema>;
 
 const repositorySchema = Type.Object({
   id: Type.Number(),
@@ -285,7 +286,7 @@ const commentSchema = Type.Object({
   // performed_via_github_app: Type.Optional(Type.Boolean()),
 });
 
-export type Comment = Static<typeof commentSchema>;
+export type GitHubComment = Static<typeof commentSchema>;
 
 const assignEventSchema = Type.Object({
   url: Type.String(),
@@ -372,117 +373,6 @@ const githubContentSchema = Type.Object({
 function strictObject<T extends TProperties>(obj: T, options?: ObjectOptions) {
   return Type.Object<T>(obj, { additionalProperties: false, default: {}, ...options });
 }
-
-export const validHTMLElements: Array<keyof HTMLElementTagNameMap> = [
-  "a",
-  "abbr",
-  "address",
-  "area",
-  "article",
-  "aside",
-  "audio",
-  "b",
-  "base",
-  "bdi",
-  "bdo",
-  "blockquote",
-  "body",
-  "br",
-  "button",
-  "canvas",
-  "caption",
-  "cite",
-  "code",
-  "col",
-  "colgroup",
-  "data",
-  "datalist",
-  "dd",
-  "del",
-  "details",
-  "dfn",
-  "dialog",
-  "div",
-  "dl",
-  "dt",
-  "em",
-  "embed",
-  "fieldset",
-  "figcaption",
-  "figure",
-  "footer",
-  "form",
-  "h1",
-  "h2",
-  "h3",
-  "h4",
-  "h5",
-  "h6",
-  "head",
-  "header",
-  "hgroup",
-  "hr",
-  "html",
-  "i",
-  "iframe",
-  "img",
-  "input",
-  "ins",
-  "kbd",
-  "label",
-  "legend",
-  "li",
-  "link",
-  "main",
-  "map",
-  "mark",
-  "meta",
-  "meter",
-  "nav",
-  "noscript",
-  "object",
-  "ol",
-  "optgroup",
-  "option",
-  "output",
-  "p",
-  "picture",
-  "pre",
-  "progress",
-  "q",
-  "rp",
-  "rt",
-  "ruby",
-  "s",
-  "samp",
-  "script",
-  "section",
-  "select",
-  "small",
-  "source",
-  "span",
-  "strong",
-  "style",
-  "sub",
-  "summary",
-  "sup",
-  "table",
-  "tbody",
-  "td",
-  "textarea",
-  "tfoot",
-  "th",
-  "thead",
-  "time",
-  "title",
-  "tr",
-  "track",
-  "u",
-  "ul",
-  "var",
-  "video",
-  "wbr",
-];
 
 const htmlEntities = validHTMLElements.map((value) => Type.Literal(value));
 
@@ -613,12 +503,3 @@ export type OrganizationPayload = {
     site_admin: boolean;
   };
 };
-
-export interface IssueClosedEventPayload {
-  issue: Issue;
-  issueComments: Comment[];
-  repoCollaborators: User[];
-  pullRequestComments: Comment[];
-  botConfig: BotConfig;
-  supabase: SupabaseClient;
-}

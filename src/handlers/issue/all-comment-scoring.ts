@@ -1,4 +1,4 @@
-import { Comment, Issue, User } from "../../types/payload";
+import { GitHubComment, GitHubIssue, GitHubUser } from "../../types/payload";
 import { commentScoringByContributionClass } from "./comment-scoring-by-contribution-style";
 import { CommentScoring } from "./comment-scoring-rubric";
 import { ContributorClassesKeys, ContributorView } from "./contribution-style-types";
@@ -12,10 +12,10 @@ export async function allCommentScoring({
   view,
   repoCollaborators,
 }: {
-  issue: Issue;
-  comments: Comment[];
+  issue: GitHubIssue;
+  comments: GitHubComment[];
   view: ContributorView;
-  repoCollaborators: User[];
+  repoCollaborators: GitHubUser[];
 }): Promise<CommentScoring[]> {
   const usersByClass = await sortUsersByClass(issue, comments, repoCollaborators);
   const commentsByClass = sortCommentsByClass(usersByClass, comments, view);

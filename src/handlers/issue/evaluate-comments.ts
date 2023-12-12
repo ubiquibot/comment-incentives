@@ -1,7 +1,7 @@
 import Decimal from "decimal.js";
 
 import OpenAI from "openai";
-import { Comment, Issue, User } from "../../types/payload";
+import { GitHubComment, GitHubIssue, GitHubUser } from "../../types/payload";
 import { allCommentScoring } from "./all-comment-scoring";
 import { CommentScoring } from "./comment-scoring-rubric";
 import { ContributorView } from "./contribution-style-types";
@@ -16,10 +16,10 @@ export async function commentsScoring({
   repoCollaborators,
   openAi,
 }: {
-  issue: Issue;
-  source: Comment[];
+  issue: GitHubIssue;
+  source: GitHubComment[];
   view: ContributorView;
-  repoCollaborators: User[];
+  repoCollaborators: GitHubUser[];
   openAi: OpenAI;
 }): Promise<UserScoreDetails[]> {
   const relevance = await relevanceScoring(issue, source, openAi);
@@ -63,13 +63,13 @@ export async function commentsScoring({
 }
 
 export interface EnrichedRelevance {
-  comment: Comment;
-  user: User;
+  comment: GitHubComment;
+  user: GitHubUser;
   score: Decimal;
 }
 
 export function enrichRelevanceData(
-  contributorComments: Comment[]
+  contributorComments: GitHubComment[]
 ): (value: Decimal, index: number, array: Decimal[]) => EnrichedRelevance {
   return (score, index) => ({
     comment: contributorComments[index],
