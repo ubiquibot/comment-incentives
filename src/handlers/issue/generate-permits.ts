@@ -60,14 +60,14 @@ async function generateComment(totals: TotalsById, issue: Issue, config: BotConf
 
     const nftMints = [];
     if (isNftRewardEnabled && userTotals.details.length > 0) {
-      const contributionType = `${userTotals.details[0].view} ${userTotals.details[0].role} ${userTotals.details[0].contribution}`;
+      const contributions = userTotals.details.map((detail) => detail.contribution).join(",");
       const nftMint = await generateNftMintSignature(
         issue.repository_url.split("github.com/")[1].split("/")[1],
         issue.repository_url.split("github.com/")[1].split("/")[2],
         issue.number.toString(),
         beneficiaryAddress,
         contributorName,
-        contributionType
+        contributions
       );
       nftMints.push(nftMint);
     }
