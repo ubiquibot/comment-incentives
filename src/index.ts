@@ -24,8 +24,8 @@ interface DelegatedComputeInputs {
   organization: string;
   issueOwner: string;
   issueRepository: string;
-  issueNumber: number;
-  repoCollaborators: GitHubUser[];
+  issueNumber: string;
+  repoCollaborators: string;
 }
 
 async function run() {
@@ -42,13 +42,10 @@ async function run() {
 }
 
 async function issueClosedEventHandler(supabaseClient: SupabaseClient, inputs: DelegatedComputeInputs) {
-  const issue = await getIssue(inputs.issueOwner, inputs.issueRepository, inputs.issueNumber);
-  const issueComments = await getIssueComments(inputs.issueOwner, inputs.issueRepository, inputs.issueNumber);
-  const pullRequestComments = await getPullRequestComments(
-    inputs.issueOwner,
-    inputs.issueRepository,
-    inputs.issueNumber
-  );
+  const issueNumber = Number(inputs.issueNumber);
+  const issue = await getIssue(inputs.issueOwner, inputs.issueRepository, issueNumber);
+  const issueComments = await getIssueComments(inputs.issueOwner, inputs.issueRepository, issueNumber);
+  const pullRequestComments = await getPullRequestComments(inputs.issueOwner, inputs.issueRepository, issueNumber);
 
   const openAi = getOpenAi();
   const config = await getConfig(inputs.organization, inputs.issueOwner, inputs.issueRepository);
@@ -62,7 +59,7 @@ async function issueClosedEventHandler(supabaseClient: SupabaseClient, inputs: D
     issue,
     issueComments,
     pullRequestComments,
-    repoCollaborators: inputs.repoCollaborators,
+    repoCollaborators: JSON.parse(inputs.repoCollaborators),
     openAi,
     config,
     supabase: supabaseClient,
