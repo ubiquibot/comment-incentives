@@ -6,7 +6,7 @@ import OpenAI from "openai";
 import zlib from "zlib";
 import { checkEnvironmentVariables } from "./check-env";
 import { issueClosed } from "./handlers/issue/issue-closed";
-import { BotConfig, GitHubComment, GitHubEvent, GitHubIssue, GitHubUser } from "./types/payload";
+import { BotConfig, GitHubComment, GitHubEvent, GitHubIssue } from "./types/payload";
 import { getLinkedPullRequests } from "./helpers/get-linked-issues-and-pull-requests";
 import { generateConfiguration } from "./utils/generate-configuration";
 

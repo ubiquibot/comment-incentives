@@ -7,7 +7,7 @@ on:
         description: "name of the received event"
         required: true
       organization:
-        description: "name of the received event"
+        description: "name of the organization"
         required: true
       issueOwner:
         description: "name of the owner of organization"
@@ -19,7 +19,7 @@ on:
         description: "issue Number of the event"
         required: true
       repoCollaborators:
-        description: "event payload"
+        description: "repository collaborators"
         required: true
 
 jobs:
