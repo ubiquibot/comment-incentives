@@ -49,4 +49,4 @@ jobs:
           -H "Accept: application/vnd.github+json" \
           -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
           https://api.github.com/repos/${{ github.repository }}/dispatches \
-          -d '{"event_type":"${{ inputs.eventName }}","client_payload":{"result": ${{ steps.callback.outputs.result }}, "issueNumber":"${{ inputs.issueNumber }}, "issueOwner":"${{ inputs.issueOwner }}, "issueRepository":"${{ inputs.issueRepository }}}}'
+          -d '{"event_type":"eventIssueClosedResult","client_payload":{"result": ${{ steps.callback.outputs.result }}, "issueNumber":"${{ inputs.issueNumber }}", "issueOwner":"${{ inputs.issueOwner }}", "issueRepository":"${{ inputs.issueRepository }}"}}'
