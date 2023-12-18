@@ -33,7 +33,6 @@ async function run() {
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
   const webhookPayload = github.context.payload;
   const inputs = webhookPayload.inputs as DelegatedComputeInputs;
-  console.log("~~~~~~~~~~~~~~~~~~~", inputs);
   const eventName = inputs.eventName;
   if (GitHubEvent.ISSUES_CLOSED === eventName) {
     return await issueClosedEventHandler(supabaseClient, inputs);
@@ -50,11 +49,6 @@ async function issueClosedEventHandler(supabaseClient: SupabaseClient, inputs: D
 
   const openAi = getOpenAi();
   const config = await getConfig(inputs.organization, inputs.issueOwner, inputs.issueRepository);
-
-  console.log(issue, "----");
-  console.log(issueComments, "----");
-  console.log(pullRequestComments, "----");
-  console.log(config, "----");
 
   const result: string = await issueClosed({
     issue,
@@ -122,18 +116,6 @@ async function getPullRequestComments(
   return pullRequestComments;
 }
 
-async function getRepoCollaborators(owner: string, repository: string): Promise<GitHubUser[]> {
-  try {
-    const collaboratorUsers = (await octokit.paginate(octokit.rest.repos.listCollaborators, {
-      owner,
-      repo: repository,
-      per_page: 100,
-    })) as GitHubUser[];
-    return collaboratorUsers;
-  } catch (err: unknown) {
-    throw new Error("Failed to fetch lists of collaborators");
-  }
-}
 function getOpenAi(): OpenAI {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error("OPENAI_API_KEY is not set");

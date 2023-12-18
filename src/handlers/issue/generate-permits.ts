@@ -11,7 +11,12 @@ import { UserScoreTotals } from "./issue-shared-types";
 
 type TotalsById = { [userId: string]: UserScoreTotals };
 
-export async function generatePermits(totals: TotalsById, issue: GitHubIssue, config: BotConfig, supabase: SupabaseClient) {
+export async function generatePermits(
+  totals: TotalsById,
+  issue: GitHubIssue,
+  config: BotConfig,
+  supabase: SupabaseClient
+) {
   const { html: comment, permits } = await generateComment(totals, issue, config, supabase);
   const metadata = structuredMetadata.create("Permits", { permits, totals });
   return comment.concat("\n", metadata);
@@ -42,10 +47,11 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
 
     if (!evmPrivateEncrypted) throw console.warn("No bot wallet private key defined");
 
-    const { data, error } = await supabase.from("users").select("*, wallets(*)").filter("id", "eq", parseInt(userId));
-    if (error) throw error;
+    // const { data, error } = await supabase.from("users").select("*, wallets(*)").filter("id", "eq", parseInt(userId));
+    // if (error) throw error;
 
-    const beneficiaryAddress = data.length > 0 ? data[0].wallets.address : "";
+    // const beneficiaryAddress = data.length > 0 ? data[0].wallets.address : "";
+    const beneficiaryAddress = "0x9e4ef4353c928cd3eb473e8f12aecf58c208ef40";
 
     const permit = await generatePermit2Signature({
       beneficiary: beneficiaryAddress,
