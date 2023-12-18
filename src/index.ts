@@ -7,10 +7,10 @@ import zlib from "zlib";
 import { checkEnvironmentVariables } from "./check-env";
 import { issueClosed } from "./handlers/issue/issue-closed";
 import { BotConfig, GitHubComment, GitHubEvent, GitHubIssue, GitHubUser } from "./types/payload";
-import {getLinkedPullRequests} from './helpers/get-linked-issues-and-pull-requests'
+import { getLinkedPullRequests } from "./helpers/get-linked-issues-and-pull-requests";
 import { generateConfiguration } from "./utils/generate-configuration";
 
-export const octokit = new Octokit({ auth: process.env.PERSONAL_ACCESS_TOKEN });
+export const octokit: Octokit = new Octokit({});
 
 run()
   .then((result) => core.setOutput("result", result))
@@ -25,6 +25,7 @@ interface DelegatedComputeInputs {
   issueOwner: string;
   issueRepository: string;
   issueNumber: number;
+  repoCollaborators: GitHubUser[];
 }
 
 async function run() {
@@ -43,17 +44,25 @@ async function run() {
 async function issueClosedEventHandler(supabaseClient: SupabaseClient, inputs: DelegatedComputeInputs) {
   const issue = await getIssue(inputs.issueOwner, inputs.issueRepository, inputs.issueNumber);
   const issueComments = await getIssueComments(inputs.issueOwner, inputs.issueRepository, inputs.issueNumber);
-  const pullRequestComments = await getPullRequestComments(inputs.issueOwner, inputs.issueRepository, inputs.issueNumber);
-  const repoCollaborators = await getRepoCollaborators(inputs.issueOwner, inputs.issueRepository);
+  const pullRequestComments = await getPullRequestComments(
+    inputs.issueOwner,
+    inputs.issueRepository,
+    inputs.issueNumber
+  );
 
   const openAi = getOpenAi();
-  const config = await getConfig(inputs.organization,inputs.issueOwner, inputs.issueRepository);
+  const config = await getConfig(inputs.organization, inputs.issueOwner, inputs.issueRepository);
+
+  console.log(issue, "----");
+  console.log(issueComments, "----");
+  console.log(pullRequestComments, "----");
+  console.log(config, "----");
 
   const result: string = await issueClosed({
     issue,
     issueComments,
     pullRequestComments,
-    repoCollaborators,
+    repoCollaborators: inputs.repoCollaborators,
     openAi,
     config,
     supabase: supabaseClient,
@@ -77,7 +86,12 @@ async function getIssue(owner: string, repository: string, issueNumber: number):
   }
 }
 
-async function getIssueComments(owner: string, repository: string, issueNumber: number, format: "raw" | "html" | "text" | "full" = "raw"): Promise<GitHubComment[]> {
+async function getIssueComments(
+  owner: string,
+  repository: string,
+  issueNumber: number,
+  format: "raw" | "html" | "text" | "full" = "raw"
+): Promise<GitHubComment[]> {
   try {
     const comments = (await octokit.paginate(octokit.rest.issues.listComments, {
       owner,
@@ -93,7 +107,11 @@ async function getIssueComments(owner: string, repository: string, issueNumber: 
     throw new Error("Fetching all issue comments failed!");
   }
 }
-async function getPullRequestComments(owner: string, repository: string, issueNumber: number): Promise<GitHubComment[]> {
+async function getPullRequestComments(
+  owner: string,
+  repository: string,
+  issueNumber: number
+): Promise<GitHubComment[]> {
   const pullRequestComments: GitHubComment[] = [];
   const linkedPullRequests = await getLinkedPullRequests({ owner, repository, issue: issueNumber });
   if (linkedPullRequests.length) {
