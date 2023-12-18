@@ -6,16 +6,19 @@ on:
       eventName:
         description: "name of the received event"
         required: true
-      owner:
+      organization:
+        description: "name of the received event"
+        required: true
+      issueOwner:
         description: "name of the owner of organization"
         required: true
-      repo:
+      issueRepository:
         description: "name of the repo"
         required: true
       issueNumber:
         description: "issue Number of the event"
         required: true
-      payload:
+      repoCollaborators:
         description: "event payload"
         required: true
 
