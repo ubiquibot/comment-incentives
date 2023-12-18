@@ -32,7 +32,8 @@ async function run() {
   const { SUPABASE_URL, SUPABASE_KEY } = checkEnvironmentVariables();
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
   const webhookPayload = github.context.payload;
-  const inputs = JSON.parse(webhookPayload.inputs) as DelegatedComputeInputs;
+  const inputs = webhookPayload.inputs as DelegatedComputeInputs;
+  console.log("~~~~~~~~~~~~~~~~~~~", inputs);
   const eventName = inputs.eventName;
   if (GitHubEvent.ISSUES_CLOSED === eventName) {
     return await issueClosedEventHandler(supabaseClient, inputs);
