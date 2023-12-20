@@ -6,9 +6,9 @@ import { Payload } from "./payload";
 
 export interface Context {
   event: ProbotContext;
-//   config: BotConfig;
+  //   config: BotConfig;
   openAi: OpenAI | null;
-//   logger: Logs;
+  //   logger: Logs;
   payload: Payload;
   octokit: InstanceType<typeof ProbotOctokit>;
 }

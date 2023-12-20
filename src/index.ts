@@ -1,11 +1,10 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import OpenAI from "openai";
 import zlib from "zlib";
 import { checkEnvironmentVariables } from "./check-env";
 import { issueClosed } from "./handlers/issue/issue-closed";
-import { BotConfig, GitHubComment, GitHubEvent, GitHubIssue, GitHubUser } from "./types/payload";
+import { GitHubEvent } from "./types/payload";
 
 run()
   .then((result) => core.setOutput("result", result))
@@ -58,17 +57,17 @@ async function issueClosedEventHandler(supabaseClient: SupabaseClient, inputs: D
 }
 
 // TODO: finish implementing these functions
-async function getIssue(owner: string, repository: string, issueNumber: number): Promise<GitHubIssue> {}
-async function getIssueComments(issue: GitHubIssue): Promise<GitHubComment[]> {}
-async function getPullRequestComments(issue: GitHubIssue): Promise<GitHubComment[]> {}
-async function getRepoCollaborators(issue: GitHubIssue): Promise<GitHubUser[]> {}
-function getOpenAi(): OpenAI {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error("OPENAI_API_KEY is not set");
-  }
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-}
-async function getConfig(owner: string, repository: string): Promise<BotConfig> {
-  // TODO: fetch config from source repository.
-  // Ensure that its organization config is also fetched and merged properly as we do normally during bot startup.
-}
+// async function getIssue(owner: string, repository: string, issueNumber: number): Promise<GitHubIssue> {}
+// async function getIssueComments(issue: GitHubIssue): Promise<GitHubComment[]> {}
+// async function getPullRequestComments(issue: GitHubIssue): Promise<GitHubComment[]> {}
+// async function getRepoCollaborators(issue: GitHubIssue): Promise<GitHubUser[]> {}
+// function getOpenAi(): OpenAI {
+//   if (!process.env.OPENAI_API_KEY) {
+//     throw new Error("OPENAI_API_KEY is not set");
+//   }
+//   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// }
+// async function getConfig(owner: string, repository: string): Promise<BotConfig> {
+//   // TODO: fetch config from source repository.
+//   // Ensure that its organization config is also fetched and merged properly as we do normally during bot startup.
+// }

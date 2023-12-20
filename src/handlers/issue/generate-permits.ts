@@ -11,7 +11,12 @@ import { UserScoreTotals } from "./issue-shared-types";
 
 type TotalsById = { [userId: string]: UserScoreTotals };
 
-export async function generatePermits(totals: TotalsById, issue: GitHubIssue, config: BotConfig, supabase: SupabaseClient) {
+export async function generatePermits(
+  totals: TotalsById,
+  issue: GitHubIssue,
+  config: BotConfig,
+  supabase: SupabaseClient
+) {
   const { html: comment, permits } = await generateComment(totals, issue, config, supabase);
   const metadata = structuredMetadata.create("Permits", { permits, totals });
   return comment.concat("\n", metadata);

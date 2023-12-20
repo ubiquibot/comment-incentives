@@ -1,7 +1,6 @@
 // https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads
 
 import { ObjectOptions, Static, StaticDecode, TProperties, Type } from "@sinclair/typebox";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { validHTMLElements } from "../handlers/issue/valid-html-elements";
 
 const labelSchema = Type.Object({

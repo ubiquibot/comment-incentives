@@ -31,7 +31,9 @@ function filterComments(
   const users = usersOfCommentsByRole[role];
   if (!users) return null;
   if (Array.isArray(users)) {
-    return contributorComments.filter((comment: GitHubComment) => users.some((user: GitHubUser) => user.id == comment.user.id));
+    return contributorComments.filter((comment: GitHubComment) =>
+      users.some((user: GitHubUser) => user.id == comment.user.id)
+    );
   } else {
     return contributorComments.filter((comment: GitHubComment) => comment.user.id === users.id);
   }
