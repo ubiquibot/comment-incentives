@@ -113,9 +113,6 @@ export const validHTMLElements: Array<keyof HTMLElementTagNameMap> = [
   "wbr",
 ];
 
-
-
-
 const promotionComment =
   "###### If you enjoy the DevPool experience, please follow [Ubiquity on GitHub](https://github.com/ubiquity) and star [this repo](https://github.com/ubiquity/devpool-directory) to show your support. It helps a lot!";
 const defaultGreetingHeader =
@@ -123,10 +120,13 @@ const defaultGreetingHeader =
 
 const htmlEntities = validHTMLElements.map((value) => T.Literal(value));
 
-const allHtmlElementsSetToZero = validHTMLElements.reduce((accumulator, current) => {
-  accumulator[current] = 0;
-  return accumulator;
-}, {} as Record<keyof HTMLElementTagNameMap, number>);
+const allHtmlElementsSetToZero = validHTMLElements.reduce(
+  (accumulator, current) => {
+    accumulator[current] = 0;
+    return accumulator;
+  },
+  {} as Record<keyof HTMLElementTagNameMap, number>
+);
 
 const allCommands = ["start", "stop", "help", "autopay", "query", "ask", "multiplier", "labels", "authorize", "wallet"];
 

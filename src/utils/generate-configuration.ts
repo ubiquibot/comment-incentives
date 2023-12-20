@@ -8,8 +8,11 @@ import { octokit } from "..";
 const UBIQUIBOT_CONFIG_REPOSITORY = "ubiquibot-config";
 const UBIQUIBOT_CONFIG_FULL_PATH = ".github/ubiquibot-config.yml";
 
-export async function generateConfiguration(organization: string, owner: string, repository: string): Promise<BotConfig> {
-
+export async function generateConfiguration(
+  organization: string,
+  owner: string,
+  repository: string
+): Promise<BotConfig> {
   const orgConfig = parseYaml(
     await download({
       repository: UBIQUIBOT_CONFIG_REPOSITORY,
@@ -47,7 +50,7 @@ export async function generateConfiguration(organization: string, owner: string,
   try {
     transformConfig(merged);
   } catch (err) {
-      throw new Error("Configuration error");
+    throw new Error("Configuration error");
   }
 
   // console.dir(merged, { depth: null, colors: true });
@@ -101,13 +104,7 @@ function getErrorMsg(errors: DefinedError[]) {
     : errorsWithoutStrict.map((error) => error.instancePath.replaceAll("/", ".") + " " + error.message).join("\n");
 }
 
-async function download({
-  repository,
-  owner,
-}: {
-  repository: string;
-  owner: string;
-}): Promise<string | null> {
+async function download({ repository, owner }: { repository: string; owner: string }): Promise<string | null> {
   if (!repository || !owner) throw new Error("Repo or owner is not defined");
   try {
     const { data } = await octokit.rest.repos.getContent({
