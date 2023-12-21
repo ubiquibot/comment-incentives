@@ -33,6 +33,9 @@ async function run() {
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
   const webhookPayload = github.context.payload;
   const inputs = webhookPayload.inputs as DelegatedComputeInputs;
+
+  console.trace({ inputs });
+
   const eventName = inputs.eventName;
   if (GitHubEvent.ISSUES_CLOSED === eventName) {
     return await issueClosedEventHandler(supabaseClient, inputs);
@@ -48,6 +51,7 @@ async function issueClosedEventHandler(supabaseClient: SupabaseClient, inputs: D
   const pullRequestComments = await getPullRequestComments(inputs.issueOwner, inputs.issueRepository, issueNumber);
 
   const openAi = getOpenAi();
+  console.trace({ inputs });
   const config = await getConfig(inputs.organization, inputs.issueOwner, inputs.issueRepository);
 
   const result: string = await issueClosed({

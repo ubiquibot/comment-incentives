@@ -43,6 +43,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+      - name: Debug log values
+        run: |
+          echo "Inputs: ${{ toJson(inputs) }}"
+          echo "github.repository: ${{ toJson(github.repository) }}"
+
       - name: Trigger repository_dispatch to the repo
         run: |
           curl -L \
