@@ -3,7 +3,6 @@ import * as github from "@actions/github";
 import { Octokit } from "@octokit/rest";
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import zlib from "zlib";
 import { checkEnvironmentVariables } from "./check-env";
 import { issueClosed } from "./handlers/issue/issue-closed";
 import { getLinkedPullRequests } from "./helpers/get-linked-issues-and-pull-requests";
@@ -65,15 +64,15 @@ async function issueClosedEventHandler(supabaseClient: SupabaseClient, inputs: D
   });
 
   const clipped = result.replace(/<!--[\s\S]*?-->/g, "");
+  return JSON.stringify({ body: clipped });
+  // const compressedString = zlib.gzipSync(Buffer.from(clipped));
 
-  const compressedString = zlib.gzipSync(Buffer.from(clipped));
+  // console.trace({
+  //   clippedLength: clipped.length,
+  //   compressedLength: compressedString.length,
+  // });
 
-  console.trace({
-    clippedLength: clipped.length,
-    compressedLength: compressedString.length,
-  });
-
-  return compressedString.toJSON();
+  // return compressedString.toJSON();
 }
 
 // TODO: finish implementing these functions
