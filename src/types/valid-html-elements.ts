@@ -1,4 +1,3 @@
-
 export const validHTMLElements: Array<keyof HTMLElementTagNameMap> = [
   "a",
   "abbr",

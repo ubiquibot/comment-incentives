@@ -2,8 +2,8 @@ import { Value } from "@sinclair/typebox/value";
 import { DefinedError } from "ajv";
 import mergeWith from "lodash/merge";
 import YAML from "yaml";
-import { BotConfig, stringDuration, validateBotConfig } from "../types/configuration-types";
 import { octokit } from "..";
+import { BotConfig, stringDuration, validateBotConfig } from "../types/configuration-types";
 
 const UBIQUIBOT_CONFIG_REPOSITORY = "ubiquibot-config";
 const UBIQUIBOT_CONFIG_FULL_PATH = ".github/ubiquibot-config.yml";
