@@ -23,9 +23,7 @@ export async function generatePermits(
 }
 
 async function generateComment(totals: TotalsById, issue: GitHubIssue, config: BotConfig, supabase: SupabaseClient) {
-  const {
-    keys: { evmPrivateEncrypted },
-  } = config;
+
   const { rpc, paymentToken } = getPayoutConfigByNetworkId(config.payments.evmNetworkId);
 
   const tokenSymbol = await getTokenSymbol(paymentToken, rpc);
@@ -44,8 +42,6 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
 
     const contributorName = userTotals.user.login;
     // const contributionClassName = userTotals.details[0].contribution as ContributorClassNames;
-
-    if (!evmPrivateEncrypted) throw console.warn("No bot wallet private key defined");
 
     const { data, error } = await supabase.from("users").select("*, wallets(*)").filter("id", "eq", parseInt(userId));
     if (error) throw error;
