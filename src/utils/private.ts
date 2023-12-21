@@ -22,10 +22,26 @@ export async function decryptKeys(
   }
   const binPub = sodium.from_base64(_public, sodium.base64_variants.URLSAFE_NO_PADDING);
   const binPriv = sodium.from_base64(X25519_PRIVATE_KEY, sodium.base64_variants.URLSAFE_NO_PADDING);
+
+
+
   const binCipher = sodium.from_base64(cipherText, sodium.base64_variants.URLSAFE_NO_PADDING);
 
   const walletPrivateKey: string | null = sodium.crypto_box_seal_open(binCipher, binPub, binPriv, "text");
   _private = walletPrivateKey?.replace(KEY_PREFIX, "");
+
+  console.trace({
+    cipherText,
+    _public,
+    _private,
+    X25519_PRIVATE_KEY,
+    binPub,
+    binPriv,
+    binCipher,
+    walletPrivateKey
+  });
+
+
   return { privateKey: _private, publicKey: _public };
 }
 
