@@ -64,10 +64,12 @@ async function issueClosedEventHandler(supabaseClient: SupabaseClient, inputs: D
     supabase: supabaseClient,
   });
 
-  const compressedString = zlib.gzipSync(Buffer.from(result.replace(/<!--[\s\S]*?-->/g, "")));
+  const clipped = result.replace(/<!--[\s\S]*?-->/g, "");
+
+  const compressedString = zlib.gzipSync(Buffer.from(clipped));
 
   console.trace({
-    rawLength: result.length,
+    clippedLength: clipped.length,
     compressedLength: compressedString.length,
   });
 
