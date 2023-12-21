@@ -69,5 +69,5 @@ jobs:
               owner: issueOwner,
               repo: issueRepository,
               issue_number: issueNumber,
-              body: ${{ steps.callback.outputs.result }}
+              body: `${{ steps.callback.outputs.result }}`
             });
