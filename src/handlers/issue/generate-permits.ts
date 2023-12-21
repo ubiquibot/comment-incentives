@@ -1,23 +1,28 @@
 import Decimal from "decimal.js";
 import { stringify } from "yaml";
 
+import { SupabaseClient } from "@supabase/supabase-js";
 import { getTokenSymbol } from "../../helpers/contracts";
 import { getPayoutConfigByNetworkId } from "../../helpers/payout";
 import structuredMetadata from "../../shared/structured-metadata";
-import { BotConfig, Issue } from "../../types/payload";
+import { BotConfig, GitHubIssue } from "../../types/payload";
 import { generatePermit2Signature } from "./generate-permit-2-signature";
 import { UserScoreTotals } from "./issue-shared-types";
-import { SupabaseClient } from "@supabase/supabase-js";
 
 type TotalsById = { [userId: string]: UserScoreTotals };
 
-export async function generatePermits(totals: TotalsById, issue: Issue, config: BotConfig, supabase: SupabaseClient) {
+export async function generatePermits(
+  totals: TotalsById,
+  issue: GitHubIssue,
+  config: BotConfig,
+  supabase: SupabaseClient
+) {
   const { html: comment, permits } = await generateComment(totals, issue, config, supabase);
   const metadata = structuredMetadata.create("Permits", { permits, totals });
   return comment.concat("\n", metadata);
 }
 
-async function generateComment(totals: TotalsById, issue: Issue, config: BotConfig, supabase: SupabaseClient) {
+async function generateComment(totals: TotalsById, issue: GitHubIssue, config: BotConfig, supabase: SupabaseClient) {
   const {
     keys: { evmPrivateEncrypted },
   } = config;
@@ -96,7 +101,7 @@ function generateHtml({
   `;
 }
 
-function generateContributionsOverview(userScoreDetails: TotalsById, issue: Issue) {
+function generateContributionsOverview(userScoreDetails: TotalsById, issue: GitHubIssue) {
   const buffer = [
     "<h6>Contributions Overview</h6>",
     "<table><thead>",

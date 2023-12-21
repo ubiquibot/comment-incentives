@@ -3,7 +3,7 @@ import { JSDOM } from "jsdom";
 import Decimal from "decimal.js";
 import _ from "lodash";
 import MarkdownIt from "markdown-it";
-import { Comment } from "../../types/payload";
+import { GitHubComment } from "../../types/payload";
 import { ContributorClassesKeys } from "./contribution-style-types";
 import { FormatScoreConfig, FormatScoreConfigParams } from "./element-score-config";
 
@@ -46,7 +46,7 @@ export class CommentScoring {
               words: number;
             };
           };
-          comment: Comment;
+          comment: GitHubComment;
         };
       };
     };
@@ -90,7 +90,7 @@ export class CommentScoring {
     this.roleWordScore = new Decimal(wordValue);
   }
 
-  private _getRenderedCommentBody(comment: Comment): string {
+  private _getRenderedCommentBody(comment: GitHubComment): string {
     if (!this._renderCache[comment.id]) {
       this._renderCache[comment.id] = md.render(comment.body);
     }
@@ -126,7 +126,7 @@ export class CommentScoring {
     return score;
   }
 
-  private _getWordsNotInDisabledElements(comment: Comment): string[] {
+  private _getWordsNotInDisabledElements(comment: GitHubComment): string[] {
     const htmlString = this._getRenderedCommentBody(comment);
     const dom = new JSDOM(htmlString);
     const doc = dom.window.document;
@@ -190,7 +190,7 @@ export class CommentScoring {
     return wordCount;
   }
 
-  public computeElementScore(comment: Comment, userId: number) {
+  public computeElementScore(comment: GitHubComment, userId: number) {
     const htmlString = this._getRenderedCommentBody(comment);
     const formatStatistics = _.mapValues(_.cloneDeep(this._formatConfig), () => ({
       count: 0,
@@ -225,7 +225,7 @@ export class CommentScoring {
     return htmlString;
   }
 
-  private _initialize(comment: Comment, userId: number) {
+  private _initialize(comment: GitHubComment, userId: number) {
     if (!this.commentScores[userId]) {
       console.debug("good thing we initialized, was unsure if necessary");
       const initialCommentScoreValue = {
@@ -250,7 +250,7 @@ export class CommentScoring {
     }
   }
 
-  public computeWordScore(comment: Comment, userId: number) {
+  public computeWordScore(comment: GitHubComment, userId: number) {
     const words = this._getWordsNotInDisabledElements(comment);
     const wordScoreDetails = this._calculateWordScores(words);
 

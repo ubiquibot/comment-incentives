@@ -1,6 +1,6 @@
 import Decimal from "decimal.js";
 
-import { Comment, Issue, User } from "../../types/payload";
+import { GitHubComment, GitHubIssue, GitHubUser } from "../../types/payload";
 import { allCommentScoring } from "./all-comment-scoring";
 import { UserScoreDetails } from "./issue-shared-types";
 import { addRelevanceAndFormatScoring } from "./relevance-format-scoring";
@@ -13,9 +13,9 @@ export async function specificationScoring({
   view,
   repoCollaborators,
 }: {
-  issue: Issue;
+  issue: GitHubIssue;
   view: ContributorView;
-  repoCollaborators: User[];
+  repoCollaborators: GitHubUser[];
 }): Promise<UserScoreDetails[]> {
   // const logger = Runtime.getState().logger;
   const userScoreDetails = [] as UserScoreDetails[];
@@ -58,7 +58,7 @@ export async function specificationScoring({
   return userScoreDetails;
 }
 
-function castIssueAsComment(issue: Issue): Comment {
+function castIssueAsComment(issue: GitHubIssue): GitHubComment {
   return {
     body: issue.body,
     user: issue.user,
@@ -69,5 +69,5 @@ function castIssueAsComment(issue: Issue): Comment {
     author_association: issue.author_association,
     html_url: issue.html_url,
     url: issue.url,
-  } as Comment;
+  } as GitHubComment;
 }

@@ -1,5 +1,5 @@
 import Decimal from "decimal.js";
-import { Issue, User } from "../../types/payload";
+import { GitHubIssue, GitHubUser } from "../../types/payload";
 import { CommentScoring } from "./comment-scoring-rubric";
 import { ContributorContribution, ContributorRole, ContributorView } from "./contribution-style-types";
 
@@ -12,7 +12,7 @@ export interface UserScoreTotals {
 
   total: Decimal;
   details: UserScoreDetails[];
-  user: User;
+  user: GitHubUser;
 }
 
 export interface UserScoreDetails {
@@ -33,7 +33,7 @@ export interface UserScoreDetails {
   };
   source: {
     // comments: null | Comment[];
-    issue: Issue;
-    user: User;
+    issue: GitHubIssue;
+    user: GitHubUser;
   };
 }
