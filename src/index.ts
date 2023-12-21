@@ -64,7 +64,8 @@ async function issueClosedEventHandler(supabaseClient: SupabaseClient, inputs: D
   });
 
   const clipped = result.replace(/<!--[\s\S]*?-->/g, "");
-  return JSON.stringify({ body: clipped });
+  return clipped
+  // return JSON.stringify({ body: clipped });
   // const compressedString = zlib.gzipSync(Buffer.from(clipped));
 
   // console.trace({
