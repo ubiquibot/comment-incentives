@@ -63,7 +63,13 @@ async function issueClosedEventHandler(supabaseClient: SupabaseClient, inputs: D
     config,
     supabase: supabaseClient,
   });
+
   const compressedString = zlib.gzipSync(Buffer.from(result.replace(/<!--[\s\S]*?-->/g, "")));
+
+  console.trace({
+    rawLength: result.length,
+    compressedLength: compressedString.length,
+  });
 
   return compressedString.toJSON();
 }
