@@ -27,9 +27,6 @@ export async function generateConfiguration(
     })
   );
 
-  console.trace({ orgConfig, repoConfig });
-  console.trace({ organization, owner, repository });
-
   const merged = mergeWith({}, orgConfig, repoConfig, (objValue: unknown, srcValue: unknown) => {
     if (Array.isArray(objValue) && Array.isArray(srcValue)) {
       // if it's string array, concat and remove duplicates

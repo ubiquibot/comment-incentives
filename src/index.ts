@@ -10,7 +10,7 @@ import { getLinkedPullRequests } from "./helpers/get-linked-issues-and-pull-requ
 import { BotConfig, GitHubComment, GitHubEvent, GitHubIssue } from "./types/payload";
 import { generateConfiguration } from "./utils/generate-configuration";
 
-export const octokit: Octokit = new Octokit({});
+export const octokit: Octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 run()
   .then((result) => core.setOutput("result", result))
