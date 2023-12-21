@@ -48,20 +48,26 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
 
-      # - name: Trigger repository_dispatch to the repo
-      #   run: |
-      #     curl -L \
-      #     -X POST \
-      #     -H "Accept: application/vnd.github+json" \
-      #     -H 'Authorization: Bearer ${{ secrets.PERSONAL_ACCESS_TOKEN }}' \
-      #     https://api.github.com/repos/${{ inputs.issueOwner }}/${{ inputs.issueRepository }}/dispatches \
-      #     -d '{"event_type":"${{ inputs.eventName }}","client_payload":{"result": ${{ steps.callback.outputs.result }}, "issueNumber":"${{ inputs.issueNumber }}", "issueOwner":"${{ inputs.issueOwner }}", "issueRepository":"${{ inputs.issueRepository }}"}}'
+      - name: Get Bot Token
+        uses: tibdex/github-app-token@v1.7.0
+        id: get_installation_token
+        with:
+          app_id: ${{ secrets.UBIQUITY_BOUNTY_BOT_APP_ID }}
+          private_key: ${{ secrets.UBIQUITY_BOUNTY_BOT_PRIVATE_KEY }}
 
-      - name: Post comment to the original repo
-        run: |
-          curl -L \
-          -X POST \
-          -H "Accept: application/vnd.github+json" \
-          -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
-          https://api.github.com/repos/${{ inputs.issueOwner }}/${{ inputs.issueRepository }}/issues/${{ inputs.issueNumber }}/comments \
-          -d '${{ steps.callback.outputs.result }}'
+      - name: Post comment to the original repo as Bot
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ steps.get_installation_token.outputs.token }}
+          script: |
+            const issueOwner = "${{ inputs.issueOwner }}";
+            const issueRepository = "${{ inputs.issueRepository }}";
+            const issueNumber = "${{ inputs.issueNumber }}";
+            const commentBody = "Your comment text here"; // Replace with your comment text
+
+            const issueComment = await github.rest.issues.createComment({
+              owner: issueOwner,
+              repo: issueRepository,
+              issue_number: issueNumber,
+              body: commentBody
+            });
