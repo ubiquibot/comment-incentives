@@ -34,6 +34,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "20.10.0"
+      - name: Debug log values
+        run: |
+          echo "Inputs: ${{ toJson(inputs) }}"
+          echo "github.repository: ${{ toJson(github.repository) }}"
       - name: Calling action
         uses: ./ # Uses an action in the root directory
         id: callback
@@ -43,11 +47,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-
-      - name: Debug log values
-        run: |
-          echo "Inputs: ${{ toJson(inputs) }}"
-          echo "github.repository: ${{ toJson(github.repository) }}"
 
       - name: Trigger repository_dispatch to the repo
         run: |
