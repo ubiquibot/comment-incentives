@@ -2,12 +2,12 @@ import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { Octokit } from "@octokit/rest";
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import OpenAI from "openai";
 import { checkEnvironmentVariables } from "./check-env";
 import { issueClosed } from "./handlers/issue/issue-closed";
 import { getLinkedPullRequests } from "./helpers/get-linked-issues-and-pull-requests";
-import { BotConfig, GitHubComment, GitHubEvent, GitHubIssue } from "./types/payload";
+import { BotConfig, GitHubComment, GitHubEvent, GitHubIssue, GitHubUser } from "./types/payload";
 import { generateConfiguration } from "./utils/generate-configuration";
+import OpenAI from "openai";
 
 export const octokit: Octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
@@ -20,15 +20,14 @@ run()
 
 interface DelegatedComputeInputs {
   eventName: GitHubEvent;
-  organization: string;
   issueOwner: string;
   issueRepository: string;
   issueNumber: string;
-  repoCollaborators: string;
+  collaborators: string[];
 }
 
 async function run() {
-  const { SUPABASE_URL, SUPABASE_KEY } = checkEnvironmentVariables();
+  const { SUPABASE_URL, SUPABASE_KEY, openAi } = checkEnvironmentVariables();
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
   const webhookPayload = github.context.payload;
   const inputs = webhookPayload.inputs as DelegatedComputeInputs;
@@ -37,46 +36,49 @@ async function run() {
 
   const eventName = inputs.eventName;
   if (GitHubEvent.ISSUES_CLOSED === eventName) {
-    return await issueClosedEventHandler(supabaseClient, inputs);
+    return await issueClosedEventHandler(supabaseClient, openAi, inputs);
   } else {
     throw new Error(`Event ${eventName} is not supported`);
   }
 }
 
-async function issueClosedEventHandler(supabaseClient: SupabaseClient, inputs: DelegatedComputeInputs) {
+async function issueClosedEventHandler(supabaseClient: SupabaseClient, openAi: OpenAI, inputs: DelegatedComputeInputs) {
   const issueNumber = Number(inputs.issueNumber);
   const issue = await getIssue(inputs.issueOwner, inputs.issueRepository, issueNumber);
   const issueComments = await getIssueComments(inputs.issueOwner, inputs.issueRepository, issueNumber);
   const pullRequestComments = await getPullRequestComments(inputs.issueOwner, inputs.issueRepository, issueNumber);
 
-  const openAi = getOpenAi();
-  console.trace({ inputs });
-  const config = await getConfig(inputs.organization, inputs.issueOwner, inputs.issueRepository);
+  const config = await getConfig(inputs.issueOwner, inputs.issueRepository);
+
+  const collaborators = await Promise.all(inputs.collaborators.map((login) => getUser(login)));
 
   const result: string = await issueClosed({
     issue,
     issueComments,
     pullRequestComments,
-    repoCollaborators: JSON.parse(inputs.repoCollaborators),
+    collaborators,
     openAi,
     config,
     supabase: supabaseClient,
   });
 
-  const clipped = result.replace(/<!--[\s\S]*?-->/g, "");
-  return clipped
-  // return JSON.stringify({ body: clipped });
-  // const compressedString = zlib.gzipSync(Buffer.from(clipped));
+  return result;
 
-  // console.trace({
-  //   clippedLength: clipped.length,
-  //   compressedLength: compressedString.length,
-  // });
-
-  // return compressedString.toJSON();
+  // const clipped = result.replace(/<!--[\s\S]*?-->/g, "");
+  // return clipped;
 }
 
-// TODO: finish implementing these functions
+async function getUser(username: string): Promise<GitHubUser> {
+  try {
+    const { data: user } = await octokit.rest.users.getByUsername({
+      username: username,
+    });
+    return user as GitHubUser;
+  } catch (e: unknown) {
+    throw new Error("fetching user failed!");
+  }
+}
+
 async function getIssue(owner: string, repository: string, issueNumber: number): Promise<GitHubIssue> {
   try {
     const { data: issue } = await octokit.rest.issues.get({
@@ -128,12 +130,6 @@ async function getPullRequestComments(
   return pullRequestComments;
 }
 
-function getOpenAi(): OpenAI {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error("OPENAI_API_KEY is not set");
-  }
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-}
-async function getConfig(organization: string, owner: string, repository: string): Promise<BotConfig> {
-  return generateConfiguration(organization, owner, repository);
+async function getConfig(owner: string, repository: string): Promise<BotConfig> {
+  return generateConfiguration(owner, repository);
 }

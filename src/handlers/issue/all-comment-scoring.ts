@@ -10,14 +10,14 @@ export async function allCommentScoring({
   issue,
   comments,
   view,
-  repoCollaborators,
+  collaborators,
 }: {
   issue: GitHubIssue;
   comments: GitHubComment[];
   view: ContributorView;
-  repoCollaborators: GitHubUser[];
+  collaborators: GitHubUser[];
 }): Promise<CommentScoring[]> {
-  const usersByClass = await sortUsersByClass(issue, comments, repoCollaborators);
+  const usersByClass = await sortUsersByClass(issue, comments, collaborators);
   const commentsByClass = sortCommentsByClass(usersByClass, comments, view);
   const contributionClasses = Object.keys(usersByClass).map((key) => key as ContributorClassesKeys);
   return contributionClasses

@@ -8,15 +8,11 @@ import { BotConfig, stringDuration, validateBotConfig } from "../types/configura
 const UBIQUIBOT_CONFIG_REPOSITORY = "ubiquibot-config";
 const UBIQUIBOT_CONFIG_FULL_PATH = ".github/ubiquibot-config.yml";
 
-export async function generateConfiguration(
-  organization: string,
-  owner: string,
-  repository: string
-): Promise<BotConfig> {
+export async function generateConfiguration(owner: string, repository: string): Promise<BotConfig> {
   const orgConfig = parseYaml(
     await download({
       repository: UBIQUIBOT_CONFIG_REPOSITORY,
-      owner: organization || owner,
+      owner: owner,
     })
   );
 

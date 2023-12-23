@@ -1,25 +1,22 @@
 name: Delegated Compute Workflow
-#get log & tags information
+
 on:
   workflow_dispatch:
     inputs:
       eventName:
-        description: "name of the received event"
-        required: true
-      organization:
-        description: "name of the organization"
+        description: "Event ID"
         required: true
       issueOwner:
-        description: "name of the owner of organization"
+        description: "Organization that owns the repo"
         required: true
       issueRepository:
-        description: "name of the repo"
+        description: "Repository name"
         required: true
       issueNumber:
-        description: "issue Number of the event"
+        description: "Issue number"
         required: true
-      repoCollaborators:
-        description: "repository collaborators"
+      collaborators:
+        description: "Repository collaborators"
         required: true
 
 jobs:
@@ -49,8 +46,8 @@ jobs:
         uses: tibdex/github-app-token@v1.7.0
         id: get_installation_token
         with:
-          app_id: ${{ secrets.UBIQUITY_BOUNTY_BOT_APP_ID }}
-          private_key: ${{ secrets.UBIQUITY_BOUNTY_BOT_PRIVATE_KEY }}
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Post comment to the original repo as Bot
         uses: actions/github-script@v6

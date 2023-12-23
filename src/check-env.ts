@@ -1,3 +1,5 @@
+import { OpenAI } from "openai";
+
 export function checkEnvironmentVariables() {
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
   if (!OPENAI_API_KEY) {
@@ -13,5 +15,9 @@ export function checkEnvironmentVariables() {
   if (!SUPABASE_KEY) {
     throw new Error("SUPABASE_KEY not set");
   }
-  return { SUPABASE_URL, SUPABASE_KEY };
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY is not set");
+  }
+
+  return { SUPABASE_URL, SUPABASE_KEY, openAi: new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) };
 }

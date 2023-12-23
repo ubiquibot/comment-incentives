@@ -13,13 +13,13 @@ export async function commentsScoring({
   issue,
   source,
   view,
-  repoCollaborators,
+  collaborators,
   openAi,
 }: {
   issue: GitHubIssue;
   source: GitHubComment[];
   view: ContributorView;
-  repoCollaborators: GitHubUser[];
+  collaborators: GitHubUser[];
   openAi: OpenAI;
 }): Promise<UserScoreDetails[]> {
   const relevance = await relevanceScoring(issue, source, openAi);
@@ -29,7 +29,7 @@ export async function commentsScoring({
     issue,
     comments: source,
     view,
-    repoCollaborators,
+    collaborators,
   });
   const formattingWithRelevance: CommentScoring[] = addRelevanceAndFormatScoring(relevanceWithMetaData, formatting);
 

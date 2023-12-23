@@ -9,14 +9,14 @@ import { specificationScoring as issuerSpecificationScoring } from "./specificat
 export async function aggregateAndScoreContributions({
   issue,
   issueComments,
-  repoCollaborators,
+  collaborators,
   openAi,
   pullRequestComments,
 }: ScoreParams): Promise<UserScoreDetails[]> {
   const issueIssuerSpecification = await issuerSpecificationScoring({
     issue,
     view: "Issue",
-    repoCollaborators,
+    collaborators,
   });
 
   const issueAssigneeTask = await assigneeTaskScoring({
@@ -29,7 +29,7 @@ export async function aggregateAndScoreContributions({
     issue,
     source: issueComments.filter(botCommandsAndHumanCommentsFilter),
     view: "Issue",
-    repoCollaborators,
+    collaborators,
     openAi,
   });
 
@@ -37,7 +37,7 @@ export async function aggregateAndScoreContributions({
     issue,
     source: pullRequestComments.filter(botCommandsAndHumanCommentsFilter),
     view: "Review",
-    repoCollaborators,
+    collaborators,
     openAi,
   });
 
@@ -50,7 +50,7 @@ export async function aggregateAndScoreContributions({
 interface ScoreParams {
   issue: GitHubIssue;
   issueComments: GitHubComment[];
-  repoCollaborators: GitHubUser[];
+  collaborators: GitHubUser[];
   openAi: OpenAI;
   pullRequestComments: GitHubComment[];
 }
