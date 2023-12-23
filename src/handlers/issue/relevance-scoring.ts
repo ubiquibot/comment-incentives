@@ -7,10 +7,9 @@ export async function relevanceScoring(issue: GitHubIssue, contributorComments: 
   const prompt = generatePrompt(issue, contributorComments);
   const promptTokens = countTokensOfPrompt(prompt);
   const conversationTokens = countTokensOfConversation(issue, contributorComments);
-  const estimatedOptimalModel = estimateOptimalModel(conversationTokens, promptTokens);
-
+  // const estimatedOptimalModel = estimateOptimalModel(conversationTokens, promptTokens);
+  const estimatedOptimalModel = "gpt-4-1106-preview";
   console.trace({ estimatedOptimalModel, conversationTokens, promptTokens });
-
   const score = await sampleRelevanceScores(prompt, contributorComments, estimatedOptimalModel, openAi);
   return { score, tokens: conversationTokens, model: estimatedOptimalModel };
 }
@@ -103,7 +102,7 @@ export async function gptRelevance(openAi: OpenAI, model: string, prompt: string
 async function sampleRelevanceScores(
   prompt: string,
   contributorComments: GitHubComment[],
-  estimatedOptimalModel: ReturnType<typeof estimateOptimalModel>,
+  estimatedOptimalModel: string, // ReturnType<typeof estimateOptimalModel>,
   openAi: OpenAI
 ) {
   const BATCH_SIZE = 10;
@@ -139,7 +138,7 @@ async function fetchSamples({ prompt, estimatedOptimalModel, maxConcurrency, ope
 
 interface InEachRequestParams {
   prompt: string;
-  estimatedOptimalModel: ReturnType<typeof estimateOptimalModel>;
+  estimatedOptimalModel: string; // ReturnType<typeof estimateOptimalModel>;
   maxConcurrency: number;
   openAi: OpenAI;
 }
