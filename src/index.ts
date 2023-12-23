@@ -54,7 +54,12 @@ async function issueClosedEventHandler(
 ) {
   const issueNumber = Number(inputs.issueNumber);
   const issue = await getIssue(authenticatedOctokit, inputs.issueOwner, inputs.issueRepository, issueNumber);
-  const issueComments = await getIssueComments(authenticatedOctokit, inputs.issueOwner, inputs.issueRepository, issueNumber);
+  const issueComments = await getIssueComments(
+    authenticatedOctokit,
+    inputs.issueOwner,
+    inputs.issueRepository,
+    issueNumber
+  );
   const pullRequestComments = await getPullRequestComments(
     authenticatedOctokit,
     inputs.issueOwner,
