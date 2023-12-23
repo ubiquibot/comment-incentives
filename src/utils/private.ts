@@ -35,7 +35,12 @@ export async function decryptKeys(
     binCipher: binaryCipher,
   });
 
-  const walletPrivateKey: string | null = sodium.crypto_box_seal_open(binaryCipher, binaryPublic, binaryPrivate, "text");
+  const walletPrivateKey: string | null = sodium.crypto_box_seal_open(
+    binaryCipher,
+    binaryPublic,
+    binaryPrivate,
+    "text"
+  );
   _private = walletPrivateKey?.replace(KEY_PREFIX, "");
 
   return { privateKey: _private, publicKey: _public };

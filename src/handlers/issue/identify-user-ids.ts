@@ -6,11 +6,7 @@ export async function sortUsersByClass(
   contributorComments: GitHubComment[],
   collaborators: GitHubUser[]
 ): Promise<ContributorClasses> {
-  const filtered = await filterUsers(
-    issue,
-    contributorComments,
-    collaborators
-  );
+  const filtered = await filterUsers(issue, contributorComments, collaborators);
 
   return returnValues(filtered.issuer, filtered.assignees, filtered.collaborators, filtered.contributors);
 }

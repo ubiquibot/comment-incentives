@@ -23,7 +23,6 @@ export async function generatePermits(
 }
 
 async function generateComment(totals: TotalsById, issue: GitHubIssue, config: BotConfig, supabase: SupabaseClient) {
-
   const { rpc, paymentToken } = getPayoutConfigByNetworkId(config.payments.evmNetworkId);
 
   const tokenSymbol = await getTokenSymbol(paymentToken, rpc);

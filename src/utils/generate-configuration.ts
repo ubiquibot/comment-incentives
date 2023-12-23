@@ -1,18 +1,23 @@
+import { Octokit } from "@octokit/rest";
 import { Value } from "@sinclair/typebox/value";
 import { DefinedError } from "ajv";
 import mergeWith from "lodash/merge";
 import YAML from "yaml";
-import { octokit } from "..";
 import { BotConfig, stringDuration, validateBotConfig } from "../types/configuration-types";
 
 const UBIQUIBOT_CONFIG_REPOSITORY = "ubiquibot-config";
 const UBIQUIBOT_CONFIG_FULL_PATH = ".github/ubiquibot-config.yml";
 
-export async function generateConfiguration(owner: string, repository: string): Promise<BotConfig> {
+export async function generateConfiguration(
+  authenticatedOctokit: Octokit,
+  owner: string,
+  repository: string
+): Promise<BotConfig> {
   const orgConfig = parseYaml(
     await download({
       repository: UBIQUIBOT_CONFIG_REPOSITORY,
       owner: owner,
+      authenticatedOctokit,
     })
   );
 
@@ -20,6 +25,7 @@ export async function generateConfiguration(owner: string, repository: string): 
     await download({
       repository: repository,
       owner,
+      authenticatedOctokit,
     })
   );
 
@@ -99,11 +105,22 @@ function getErrorMsg(errors: DefinedError[]) {
     ? null
     : errorsWithoutStrict.map((error) => error.instancePath.replaceAll("/", ".") + " " + error.message).join("\n");
 }
-
-async function download({ repository, owner }: { repository: string; owner: string }): Promise<string | null> {
+async function download({
+  repository,
+  owner,
+  authenticatedOctokit,
+}: {
+  repository: string;
+  owner: string;
+  authenticatedOctokit: Octokit;
+}): Promise<string | null> {
   if (!repository || !owner) throw new Error("Repo or owner is not defined");
+
+  // const installationOctokit = (await getInstallationOctokitForOrg(authToken, owner)) as unknown as ExampleInstallation;
+  // const authenticatedOctokit = new Octokit({ auth: authToken });
+
   try {
-    const { data } = await octokit.rest.repos.getContent({
+    const { data } = await authenticatedOctokit.rest.repos.getContent({
       owner,
       repo: repository,
       path: UBIQUIBOT_CONFIG_FULL_PATH,
@@ -114,6 +131,22 @@ async function download({ repository, owner }: { repository: string; owner: stri
     return null;
   }
 }
+// async function getInstallationOctokitForOrg(authToken: string, org: string) {
+//   // You might need to adapt this part based on the actual event type your app handles
+//   const installations = await context.octokit.apps.listInstallations();
+//   // context.logger.debug("installations", installations);
+//   const installation = installations.data.find((inst) => inst.account?.login === org) as ExampleResponse;
+//   // context.logger.debug("installation", installation);
+
+//   if (!installation) {
+//     throw new Error(`No installation found for organization: ${org}`);
+//   }
+
+//   return context.octokit.auth({
+//     type: "installation",
+//     installationId: installation.id,
+//   }) as Promise<InstanceType<typeof Octokit>>;
+// }
 
 export function parseYaml(data: null | string) {
   try {
@@ -130,3 +163,54 @@ export function parseYaml(data: null | string) {
 interface DecodeError extends Error {
   value?: string;
 }
+
+// interface ExampleResponse {
+//   id: 37628281;
+//   account: GitHubUser;
+//   repository_selection: "all";
+//   access_tokens_url: "https://api.github.com/app/installations/37628281/access_tokens";
+//   repositories_url: "https://api.github.com/installation/repositories";
+//   html_url: "https://github.com/organizations/ubiquibot/settings/installations/37628281";
+//   app_id: 236521;
+//   app_slug: "ubiquibot";
+//   target_id: 133917611;
+//   target_type: "Organization";
+//   permissions: {
+//     issues: "write";
+//     actions: "write";
+//     members: "read";
+//     contents: "write";
+//     metadata: "read";
+//     pull_requests: "write";
+//   };
+//   events: GitHubEvent[];
+//   created_at: "2023-05-17T20:52:25.000Z";
+//   updated_at: "2023-12-23T09:58:37.000Z";
+//   single_file_name: null;
+//   has_multiple_single_files: false;
+//   single_file_paths: [];
+//   suspended_by: null;
+//   suspended_at: null;
+//   caller: "getInstallationOctokitForOrg";
+//   revision: "4c15837";
+// }
+
+// interface ExampleInstallation {
+//   type: "token";
+//   tokenType: "installation";
+//   token: "ghs_Pm5WyIfH7OjYg6uDv9MQGflRuaGeub2LYHu9";
+//   installationId: 37628281;
+//   permissions: {
+//     members: "read";
+//     actions: "write";
+//     contents: "write";
+//     issues: "write";
+//     metadata: "read";
+//     pull_requests: "write";
+//   };
+//   createdAt: "2023-12-23T15:08:59.876Z";
+//   expiresAt: "2023-12-23T16:08:59Z";
+//   repositorySelection: "all";
+//   caller: "dispatchWorkflow";
+//   revision: "4c15837";
+// }

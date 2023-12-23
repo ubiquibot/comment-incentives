@@ -19,5 +19,21 @@ export function checkEnvironmentVariables() {
     throw new Error("OPENAI_API_KEY is not set");
   }
 
-  return { SUPABASE_URL, SUPABASE_KEY, openAi: new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) };
+  // Use environment variables or other secure means to store these values
+  const appId = process.env.UBIQUIBOT_APP_ID;
+  const privateKey = process.env.UBIQUIBOT_APP_PRIVATE_KEY;
+  const installationId = process.env.INSTALLATION_ID_ORG_A; // ID for Org A's installation
+
+  if (!appId) throw new Error("Missing UBIQUIBOT_APP_ID environment variable");
+  if (!privateKey) throw new Error("Missing UBIQUIBOT_APP_PRIVATE_KEY environment variable");
+  if (!installationId) throw new Error("Missing INSTALLATION_ID_ORG_A environment variable");
+
+  return {
+    SUPABASE_URL,
+    SUPABASE_KEY,
+    openAi: new OpenAI({ apiKey: process.env.OPENAI_API_KEY }),
+    appId,
+    privateKey,
+    installationId,
+  };
 }
