@@ -7,12 +7,37 @@ import { checkEnvironmentVariables } from "./check-env";
 import { issueClosed } from "./handlers/issue/issue-closed";
 import { getLinkedPullRequests } from "./helpers/get-linked-issues-and-pull-requests";
 import { BotConfig, GitHubComment, GitHubEvent, GitHubIssue, GitHubUser } from "./types/payload";
-import { generateConfiguration } from "./utils/generate-configuration";
 import { generateInstallationAccessToken } from "./utils/generate-access-token";
+import { generateConfiguration } from "./utils/generate-configuration";
 
-export const octokit: Octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+async function getAuthenticatedOctokit() {
+  const { appId, privateKey } = checkEnvironmentVariables();
+  const webhookPayload = github.context.payload;
+  const inputs = webhookPayload.inputs as DelegatedComputeInputs; //as ExampleInputs;
+  const originRepositoryAuthenticationToken = await generateInstallationAccessToken(
+    appId,
+    privateKey,
+    inputs.installationId
+  );
+  const authenticatedOctokit = new Octokit({ auth: originRepositoryAuthenticationToken });
+  return authenticatedOctokit;
+}
 
-run()
+async function postAuthenticatedRunResult(result: string) {
+  const octokit = await getAuthenticatedOctokit();
+  const inputs = github.context.payload.inputs as DelegatedComputeInputs;
+
+  return await octokit.rest.issues.createComment({
+    owner: inputs.issueOwner,
+    repo: inputs.issueRepository,
+    issue_number: Number(inputs.issueNumber),
+    body: result,
+  });
+}
+
+getAuthenticatedOctokit()
+  .then(run)
+  .then(postAuthenticatedRunResult)
   .then((result) => core.setOutput("result", result))
   .catch((error) => {
     console.error(error);
@@ -28,12 +53,10 @@ interface DelegatedComputeInputs {
   installationId: string;
 }
 
-async function run() {
-  const { SUPABASE_URL, SUPABASE_KEY, openAi, appId, privateKey } = checkEnvironmentVariables();
+async function run(authenticatedOctokit: Octokit) {
+  const { SUPABASE_URL, SUPABASE_KEY, openAi } = checkEnvironmentVariables();
   const webhookPayload = github.context.payload;
   const inputs = webhookPayload.inputs as DelegatedComputeInputs; //as ExampleInputs;
-  const originRepositoryAuthenticationToken = await generateInstallationAccessToken(appId, privateKey, inputs.installationId);
-  const authenticatedOctokit = new Octokit({ auth: originRepositoryAuthenticationToken });
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   console.trace({ inputs });
@@ -71,7 +94,9 @@ async function issueClosedEventHandler(
 
   const collaboratorsParsed = JSON.parse(inputs.collaborators);
 
-  const collaborators = await Promise.all(collaboratorsParsed.map((login: GitHubUser["login"]) => getUser(login)));
+  const collaborators = await Promise.all(
+    collaboratorsParsed.map((login: GitHubUser["login"]) => getUser(authenticatedOctokit, login))
+  );
 
   const result: string = await issueClosed({
     issue,
@@ -89,9 +114,9 @@ async function issueClosedEventHandler(
   // return clipped;
 }
 
-async function getUser(username: string): Promise<GitHubUser> {
+async function getUser(authenticatedOctokit: Octokit, username: string): Promise<GitHubUser> {
   try {
-    const { data: user } = await octokit.rest.users.getByUsername({
+    const { data: user } = await authenticatedOctokit.rest.users.getByUsername({
       username: username,
     });
     return user as GitHubUser;
@@ -126,7 +151,7 @@ async function getIssueComments(
   format: "raw" | "html" | "text" | "full" = "raw"
 ): Promise<GitHubComment[]> {
   try {
-    const comments = (await authenticatedOctokit.paginate(octokit.rest.issues.listComments, {
+    const comments = (await authenticatedOctokit.paginate(authenticatedOctokit.rest.issues.listComments, {
       owner,
       repo: repository,
       issue_number: issueNumber,
