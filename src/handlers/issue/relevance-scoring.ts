@@ -8,6 +8,9 @@ export async function relevanceScoring(issue: GitHubIssue, contributorComments: 
   const promptTokens = countTokensOfPrompt(prompt);
   const conversationTokens = countTokensOfConversation(issue, contributorComments);
   const estimatedOptimalModel = estimateOptimalModel(conversationTokens, promptTokens);
+
+  console.trace({ estimatedOptimalModel, conversationTokens, promptTokens });
+
   const score = await sampleRelevanceScores(prompt, contributorComments, estimatedOptimalModel, openAi);
   return { score, tokens: conversationTokens, model: estimatedOptimalModel };
 }
@@ -15,7 +18,6 @@ export async function relevanceScoring(issue: GitHubIssue, contributorComments: 
 export function estimateOptimalModel(conversationTokens: number, promptTokens: number) {
   const totalSumOfTokens = conversationTokens + promptTokens;
   // we used the gpt-3.5-turbo encoder to estimate the amount of tokens.
-  // this also doesn't include the overhead of the prompting etc so this is expected to be a slight underestimate
   if (totalSumOfTokens <= 4097) {
     return "gpt-3.5-turbo";
   } else if (totalSumOfTokens <= 16385) {
@@ -23,7 +25,7 @@ export function estimateOptimalModel(conversationTokens: number, promptTokens: n
     return "gpt-3.5-turbo-16k";
   } else {
     // TODO: maybe use gpt-4 encoder to recalculate tokens
-    console.warn("Backup plan for development purposes only, but using gpt-4-32k due to huge context size");
+    console.warn("Backup plan for development purposes only, but using gpt-4 due to huge context size");
     return "gpt-4";
   }
 }
@@ -51,6 +53,7 @@ function countTokensOfPrompt(prompt: string) {
   const totalSumOfTokens = sumOfSpecificationTokens;
   return totalSumOfTokens;
 }
+
 export function countTokensOfConversation(issue: GitHubIssue, comments: GitHubComment[]) {
   const specificationComment = issue.body;
   if (!specificationComment) {
@@ -101,7 +104,6 @@ async function sampleRelevanceScores(
   prompt: string,
   contributorComments: GitHubComment[],
   estimatedOptimalModel: ReturnType<typeof estimateOptimalModel>,
-  // issue: GitHubIssue,
   openAi: OpenAI
 ) {
   const BATCH_SIZE = 10;
@@ -112,9 +114,7 @@ async function sampleRelevanceScores(
   for (let attempt = 0; attempt < BATCHES; attempt++) {
     const fetchedSamples = await fetchSamples({
       prompt,
-      // contributorComments,
       estimatedOptimalModel,
-      // issue,
       maxConcurrency: BATCH_SIZE,
       openAi,
     });
@@ -127,15 +127,7 @@ async function sampleRelevanceScores(
   return average;
 }
 
-async function fetchSamples({
-  prompt,
-  // contributorComments,
-  estimatedOptimalModel,
-  // issue,
-  maxConcurrency,
-  openAi,
-}: InEachRequestParams) {
-  // const commentsSerialized = contributorComments.map((comment) => comment.body);
+async function fetchSamples({ prompt, estimatedOptimalModel, maxConcurrency, openAi }: InEachRequestParams) {
   const batchPromises = [];
   for (let i = 0; i < maxConcurrency; i++) {
     const requestPromise = gptRelevance(openAi, estimatedOptimalModel, prompt);
@@ -147,9 +139,7 @@ async function fetchSamples({
 
 interface InEachRequestParams {
   prompt: string;
-  // contributorComments: GitHubComment[];
   estimatedOptimalModel: ReturnType<typeof estimateOptimalModel>;
-  // issue: GitHubIssue;
   maxConcurrency: number;
   openAi: OpenAI;
 }
@@ -179,6 +169,5 @@ function averageSamples(batchResults: (number | Decimal)[][], precision: number)
     })
     .map((score) => score.toDecimalPlaces(precision));
 
-  // console.trace(`${JSON.stringify(batchResults)} -> ${JSON.stringify(averageScores)}`);
   return averageScores;
 }
