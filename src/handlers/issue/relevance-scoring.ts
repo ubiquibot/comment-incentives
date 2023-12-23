@@ -8,7 +8,9 @@ export async function relevanceScoring(issue: GitHubIssue, contributorComments: 
   const promptTokens = countTokensOfPrompt(prompt);
   const conversationTokens = countTokensOfConversation(issue, contributorComments);
   const estimatedOptimalModel = estimateOptimalModel(conversationTokens, promptTokens);
-  // console.trace({ prompt, estimatedOptimalModel, conversationTokens, promptTokens });
+
+  console.dir(prompt, { depth: null, colors: true });
+
   const score = await sampleRelevanceScores(prompt, contributorComments, estimatedOptimalModel, openAi);
   return { score, tokens: conversationTokens, model: estimatedOptimalModel };
 }
@@ -85,8 +87,8 @@ export async function gptRelevance(openAi: OpenAI, model: string, prompt: string
         content: prompt,
       },
     ],
-    temperature: 1,
-    max_tokens: 64,
+    temperature: 0.1,
+    max_tokens: 1024,
     top_p: 1,
     frequency_penalty: 0,
     presence_penalty: 0,
@@ -150,7 +152,7 @@ interface InEachRequestParams {
 function filterSamples(batchResults: number[][], correctLength: number) {
   return batchResults.filter((result) => {
     if (result.length != correctLength) {
-      console.error("Correct length is not defined", {
+      console.error("Results are not the expected length", {
         batchResultsLength: batchResults.length,
         result,
       });
