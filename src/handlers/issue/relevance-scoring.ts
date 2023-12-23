@@ -8,7 +8,7 @@ export async function relevanceScoring(issue: GitHubIssue, contributorComments: 
   const promptTokens = countTokensOfPrompt(prompt);
   const conversationTokens = countTokensOfConversation(issue, contributorComments);
   const estimatedOptimalModel = estimateOptimalModel(conversationTokens, promptTokens);
-  console.trace({ prompt, estimatedOptimalModel, conversationTokens, promptTokens });
+  // console.trace({ prompt, estimatedOptimalModel, conversationTokens, promptTokens });
   const score = await sampleRelevanceScores(prompt, contributorComments, estimatedOptimalModel, openAi);
   return { score, tokens: conversationTokens, model: estimatedOptimalModel };
 }
@@ -107,11 +107,11 @@ async function sampleRelevanceScores(
   openAi: OpenAI
 ) {
   const BATCH_SIZE = 10;
-  const BATCHES = 1;
+  const MAX_ATTEMPTS = 10;
   const correctLength = contributorComments.length;
   const batchSamples = [] as Decimal[][];
 
-  for (let attempt = 0; attempt < BATCHES; attempt++) {
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const fetchedSamples = await fetchSamples({
       prompt,
       estimatedOptimalModel,
@@ -119,8 +119,11 @@ async function sampleRelevanceScores(
       openAi,
     });
     const filteredSamples = filterSamples(fetchedSamples, correctLength);
-    const averagedSample = averageSamples(filteredSamples, 10);
-    batchSamples.push(averagedSample);
+    if (filteredSamples.length >= BATCH_SIZE) {
+      const averagedSample = averageSamples(filteredSamples, 10);
+      batchSamples.push(averagedSample);
+      break;
+    }
   }
   const average = averageSamples(batchSamples, 4);
 
