@@ -39,6 +39,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           X25519_PRIVATE_KEY: ${{ secrets.X25519_PRIVATE_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           UBIQUIBOT_APP_ID: ${{ secrets.UBIQUIBOT_APP_ID }}
           UBIQUIBOT_APP_PRIVATE_KEY: ${{ secrets.UBIQUIBOT_APP_PRIVATE_KEY }}
