@@ -27,9 +27,9 @@ interface DelegatedComputeInputs {
   collaborators: string;
 }
 
-const { SUPABASE_URL, SUPABASE_KEY, openAi, appId, privateKey, installationId } = checkEnvironmentVariables();
 
 async function run() {
+  const { SUPABASE_URL, SUPABASE_KEY, openAi, appId, privateKey, installationId } = checkEnvironmentVariables();
   const originRepositoryAuthenticationToken = await generateInstallationAccessToken(appId, privateKey, installationId);
   const authenticatedOctokit = new Octokit({ auth: originRepositoryAuthenticationToken });
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
