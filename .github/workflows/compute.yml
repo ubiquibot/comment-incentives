@@ -40,14 +40,15 @@ jobs:
           X25519_PRIVATE_KEY: ${{ secrets.X25519_PRIVATE_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          UBIQUIBOT_APP_ID: ${{ secrets.UBIQUIBOT_APP_ID }}
+          UBIQUIBOT_APP_PRIVATE_KEY: ${{ secrets.UBIQUIBOT_APP_PRIVATE_KEY }}
 
       - name: Get Bot Token
         uses: tibdex/github-app-token@v1.7.0
         id: get_installation_token
         with:
-          app_id: ${{ secrets.APP_ID }}
-          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+          app_id: ${{ secrets.UBIQUIBOT_APP_ID }}
+          private_key: ${{ secrets.UBIQUIBOT_APP_PRIVATE_KEY }}
 
       - name: Post comment to the original repo as Bot
         uses: actions/github-script@v6
