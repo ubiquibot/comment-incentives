@@ -1,0 +1,60 @@
+keys:
+  evmPrivateEncrypted: LQxXmtQGzgLrZa34IsryOKJkQklFiRiQUi-wTj6xPiWzmSJlDZm0in-CMqIT9OfhB0fzvm3ejzgyRKk27bBERSCpcBt4X8iTQ0UWPD_CrJXg5rJDm_f_BwHuRVleEDk8Zz2i2Ul5aWlt5rQaO5L5Uw
+  openAi: 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
+
+features:
+  assistivePricing: true
+  publicAccessControl:
+    setLabel: true
+    fundExternalClosedIssue: true
+
+payments:
+  evmNetworkId: 100
+  basePriceMultiplier: 1
+  issueCreatorMultiplier: 3
+  maxPermitPrice: 1000
+
+timers:
+  reviewDelayTolerance: 30 days
+  taskStaleTimeoutDuration: 30 days
+  taskFollowUpDuration: 3.5 days
+  taskDisqualifyDuration: 7 days
+
+miscellaneous:
+  promotionComment: "<h6>If you've enjoyed your experience in the DevPool, we'd appreciate your support. Follow <a href='https://github.com/ubiquity'>Ubiquity on GitHub</a> and star <a href='https://github.com/ubiquity/devpool-directory'>this repo</a>. Your endorsement means the world to us and helps us grow!</h6><h6>We are excited to announce that the DevPool and UbiquiBot are now available to partners! Our ideal collaborators are globally distributed crypto-native organizations, who actively work on open source on GitHub, and excel in research & development. If you can introduce us to the repository maintainers in these types of companies, we have a special bonus in store for you!</h6>"
+  maxConcurrentTasks: 2
+  registerWalletWithVerification: false
+
+disabledCommands: []
+
+incentives:
+  comment:
+    elements:
+      code: 1
+      img: 0
+      h1: 1
+      h2: 1
+      h3: 1
+      h4: 1
+      h5: 1
+      h6: 1
+      li: 0.5
+      a: 1
+      blockquote: 0
+      i: 0
+    totals:
+      word: 0.1
+
+labels:
+  time:
+    - "Time: <1 Hour"
+    - "Time: <2 Hours"
+    - "Time: <4 Hours"
+    - "Time: <1 Day"
+    - "Time: <1 Week"
+  priority:
+    - "Priority: 1 (Normal)"
+    - "Priority: 2 (Medium)"
+    - "Priority: 3 (High)"
+    - "Priority: 4 (Urgent)"
+    - "Priority: 5 (Emergency)"

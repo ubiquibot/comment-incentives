@@ -1,0 +1,65 @@
+name: Delegated Compute Workflow
+#get log & tags information
+on:
+  workflow_dispatch:
+    inputs:
+      eventName:
+        description: "name of the received event"
+        required: true
+      organization:
+        description: "name of the organization"
+        required: true
+      issueOwner:
+        description: "name of the owner of organization"
+        required: true
+      issueRepository:
+        description: "name of the repo"
+        required: true
+      issueNumber:
+        description: "issue Number of the event"
+        required: true
+      repoCollaborators:
+        description: "repository collaborators"
+        required: true
+
+jobs:
+  handler-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: print event name
+        run: echo ${{ inputs.eventName }}
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.10.0"
+
+      - name: Calling action
+        uses: ./ # Uses an action in the root directory
+        id: callback
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          X25519_PRIVATE_KEY: ${{ secrets.X25519_PRIVATE_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+      - name: Get Bot Token
+        uses: tibdex/github-app-token@v1.7.0
+        id: get_installation_token
+        with:
+          app_id: ${{ secrets.UBIQUITY_BOUNTY_BOT_APP_ID }}
+          private_key: ${{ secrets.UBIQUITY_BOUNTY_BOT_PRIVATE_KEY }}
+
+      - name: Post comment to the original repo as Bot
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ steps.get_installation_token.outputs.token }}
+          script: |
+            await github.rest.issues.createComment({
+              owner: "${{ inputs.issueOwner }}",
+              repo: "${{ inputs.issueRepository }}",
+              issue_number: "${{ inputs.issueNumber }}",
+              body: `${{ steps.callback.outputs.result }}`
+            });

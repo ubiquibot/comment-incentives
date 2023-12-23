@@ -1,0 +1,16 @@
+name: "Delegate Compute"
+description: "UbiquiBot Delegated Compute Action"
+outputs:
+  result: # id of output
+    description: "The result of a event handler"
+    value: ${{ steps.mainHandler.outputs.result}}
+runs:
+  using: "composite"
+  steps:
+    - run: cd ${{ github.action_path }}
+      shell: bash
+    - run: yarn --cwd ${{ github.action_path }} --production=true
+      shell: bash
+    - run: yarn --cwd ${{ github.action_path }} start
+      shell: bash
+      id: mainHandler
