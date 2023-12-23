@@ -18,6 +18,9 @@ on:
       collaborators:
         description: "Repository collaborators"
         required: true
+      installationId:
+        description: "Installation ID"
+        required: true
 
 jobs:
   handler-job:

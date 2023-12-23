@@ -25,16 +25,16 @@ interface DelegatedComputeInputs {
   issueRepository: string;
   issueNumber: string;
   collaborators: string;
+  installationId: string;
 }
 
-
 async function run() {
-  const { SUPABASE_URL, SUPABASE_KEY, openAi, appId, privateKey, installationId } = checkEnvironmentVariables();
-  const originRepositoryAuthenticationToken = await generateInstallationAccessToken(appId, privateKey, installationId);
-  const authenticatedOctokit = new Octokit({ auth: originRepositoryAuthenticationToken });
-  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const { SUPABASE_URL, SUPABASE_KEY, openAi, appId, privateKey } = checkEnvironmentVariables();
   const webhookPayload = github.context.payload;
   const inputs = webhookPayload.inputs as DelegatedComputeInputs; //as ExampleInputs;
+  const originRepositoryAuthenticationToken = await generateInstallationAccessToken(appId, privateKey, inputs.installationId);
+  const authenticatedOctokit = new Octokit({ auth: originRepositoryAuthenticationToken });
+  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   console.trace({ inputs });
 
