@@ -164,15 +164,27 @@ function filterSamples(batchResults: number[][], correctLength: number) {
 }
 
 function averageSamples(batchResults: (number | Decimal)[][], precision: number) {
-  const averageScores = batchResults[0]
-    .map((_, columnIndex) => {
-      let sum = new Decimal(0);
-      batchResults.forEach((row) => {
-        sum = sum.plus(row[columnIndex]);
-      });
-      return sum.dividedBy(batchResults.length);
-    })
-    .map((score) => score.toDecimalPlaces(precision));
-
-  return averageScores;
+  try {
+    return batchResults[0]
+      .map((_, columnIndex) => {
+        let sum = new Decimal(0);
+        batchResults.forEach((row) => {
+          sum = sum.plus(row[columnIndex]);
+        });
+        return sum.dividedBy(batchResults.length);
+      })
+      .map((score) => score.toDecimalPlaces(precision));
+  } catch (error) {
+    console.error("Failed to average samples", { error });
+    console.trace({ batchResults });
+    return batchResults
+      .map((_, columnIndex) => {
+        let sum = new Decimal(0);
+        batchResults.forEach((row) => {
+          sum = sum.plus(row[columnIndex]);
+        });
+        return sum.dividedBy(batchResults.length);
+      })
+      .map((score) => score.toDecimalPlaces(precision));
+  }
 }
