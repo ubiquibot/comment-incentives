@@ -33,7 +33,7 @@ export async function commentsScoring({
   });
   const formattingWithRelevance: CommentScoring[] = addRelevanceAndFormatScoring(relevanceWithMetaData, formatting);
 
-  const userScoreDetails = formattingWithRelevance.reduce((acc, commentScoring) => {
+  const userScoreDetails = formattingWithRelevance.reduce((accumulator, commentScoring) => {
     for (const userId in commentScoring.commentScores) {
       const userScore = commentScoring.commentScores[userId];
 
@@ -54,9 +54,9 @@ export async function commentsScoring({
         },
       };
 
-      acc.push(userScoreDetail);
+      accumulator.push(userScoreDetail);
     }
-    return acc;
+    return accumulator;
   }, [] as UserScoreDetails[]);
 
   return userScoreDetails;

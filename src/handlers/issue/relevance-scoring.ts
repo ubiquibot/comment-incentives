@@ -79,22 +79,22 @@ export function countTokensOfConversation(issue: GitHubIssue, comments: GitHubCo
 export async function gptRelevance(openAi: OpenAI, model: string, prompt: string) {
   if (!openAi) throw new Error("OpenAI adapter is not defined");
 
-  const response: OpenAI.Chat.ChatCompletion = await openAi.chat.completions.create({
-    model: model,
-    messages: [
-      {
-        role: "system",
-        content: prompt,
-      },
-    ],
-    temperature: 0.1,
-    max_tokens: 1024,
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0,
-  });
-
   try {
+    const response: OpenAI.Chat.ChatCompletion = await openAi.chat.completions.create({
+      model: model,
+      messages: [
+        {
+          role: "system",
+          content: prompt,
+        },
+      ],
+      temperature: 1,
+      max_tokens: 128,
+      top_p: 1,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+    });
+
     const parsedResponse = JSON.parse(response.choices[0].message.content as "[1, 1, 0.5, 0]") as number[];
     return parsedResponse;
   } catch (error) {
