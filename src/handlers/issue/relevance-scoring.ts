@@ -150,15 +150,16 @@ interface InEachRequestParams {
 }
 
 function filterSamples(batchResults: number[][], correctLength: number) {
-  return batchResults.filter((result) => {
-    if (result.length != correctLength) {
+  return batchResults.map((batchResult) => {
+    const filtered = batchResult.filter((score) => score >= 0 && score <= 1);
+    if (filtered.length != correctLength) {
       console.error("Results are not the expected length", {
-        batchResultsLength: batchResults.length,
-        result,
+        batchResultLength: filtered.length,
+        result: filtered,
       });
       return false;
     } else {
-      return true;
+      return filtered;
     }
   });
 }
