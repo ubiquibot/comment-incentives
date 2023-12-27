@@ -72,10 +72,10 @@ async function generateComment(totals: TotalsById, issue: Issue, config: BotConf
       nftMints.push(nftMint);
     }
 
-    const claimData = {
-      permits: [permit],
-      nftMints,
-    };
+    const claimData = [
+      ...permits.map((permit) => ({ type: "permit", ...permit })),
+      ...nftMints.map((nftMint) => ({ type: "nft-mint", ...nftMint })),
+    ];
     const base64encodedClaimData = Buffer.from(JSON.stringify(claimData)).toString("base64");
     const claimUrl = new URL("https://pay.ubq.fi/");
     claimUrl.searchParams.append("claim", base64encodedClaimData);
