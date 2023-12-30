@@ -18,8 +18,8 @@ export async function generatePermits(
   config: BotConfig,
   supabase: SupabaseClient
 ) {
-  const { html: comment, permits } = await generateComment(totals, issue, config, supabase);
-  const metadata = structuredMetadata.create("Permits", { permits, totals });
+  const { html: comment, allTxs } = await generateComment(totals, issue, config, supabase);
+  const metadata = structuredMetadata.create("Transactions", { allTxs, totals });
   return comment.concat("\n", metadata);
 }
 
@@ -32,7 +32,7 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
   const tokenSymbol = await getTokenSymbol(paymentToken, rpc);
   const htmlArray = [] as string[];
 
-  const permits = [];
+  const allTxs = [];
 
   for (const userId in totals) {
     const userTotals = totals[userId];
@@ -51,27 +51,32 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
 
     const beneficiaryAddress = data.length > 0 ? data[0].wallets.address : "";
 
+    const permits = [];
     const permit = await generatePermit2Signature({
       beneficiary: beneficiaryAddress,
       amount: tokenAmount,
       userId: userId,
+      organizationName: issue.repository_url.split("/").slice(-2)[0],
+      repositoryName: issue.repository_url.split("/").slice(-1)[0],
+      issueNumber: issue.number.toString(),
       config,
     });
-
     permits.push(permit);
+    allTxs.push(permit);
 
     const nftMints = [];
     if (isNftRewardEnabled && userTotals.details.length > 0) {
       const contributions = userTotals.details.map((detail) => detail.contribution).join(",");
-      const nftMint = await generateNftMintSignature(
-        issue.repository_url.split("github.com/")[1].split("/")[1],
-        issue.repository_url.split("github.com/")[1].split("/")[2],
-        issue.number.toString(),
-        beneficiaryAddress,
-        contributorName,
-        contributions
-      );
+      const nftMint = await generateNftMintSignature({
+        organizationName: issue.repository_url.split("/").slice(-2)[0],
+        repositoryName: issue.repository_url.split("/").slice(-1)[0],
+        issueNumber: issue.number.toString(),
+        beneficiary: beneficiaryAddress,
+        username: contributorName,
+        contributionType: contributions,
+      });
       nftMints.push(nftMint);
+      allTxs.push(nftMint);
     }
 
     const claimData = [
@@ -92,7 +97,7 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
     });
     htmlArray.push(html);
   }
-  return { html: htmlArray.join("\n"), permits };
+  return { html: htmlArray.join("\n"), allTxs };
 }
 function generateHtml({
   claimUrl,

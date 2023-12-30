@@ -10,6 +10,9 @@ export async function generatePermit2Signature({
   beneficiary,
   amount,
   userId,
+  repositoryName,
+  organizationName,
+  issueNumber,
   config,
 }: GeneratePermit2SignatureParams) {
   const {
@@ -47,7 +50,7 @@ export async function generatePermit2Signature({
       amount: ethers.utils.parseUnits(amount.toString(), 18),
     },
     spender: beneficiary,
-    nonce: BigNumber.from(keccak256(toUtf8Bytes(userId))),
+    nonce: BigNumber.from(keccak256(toUtf8Bytes(`${organizationName}${repositoryName}${issueNumber}${userId}`))),
     deadline: MaxUint256,
   };
 
@@ -96,6 +99,9 @@ interface GeneratePermit2SignatureParams {
   amount: Decimal;
 
   userId: string;
+  organizationName: string;
+  repositoryName: string;
+  issueNumber: string;
   config: BotConfig;
 }
 

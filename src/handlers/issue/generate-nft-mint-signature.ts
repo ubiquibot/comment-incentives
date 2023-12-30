@@ -1,6 +1,7 @@
-import { BigNumberish, ethers, utils } from "ethers";
+import { BigNumber, BigNumberish, ethers, utils } from "ethers";
 import { getPayoutConfigByNetworkId } from "../../helpers/payout";
 import { MaxUint256 } from "@uniswap/permit2-sdk";
+import { keccak256, toUtf8Bytes } from "ethers/lib/utils";
 
 const NFT_MINTER_PRIVATE_KEY = process.env.NFT_MINTER_PRIVATE_KEY as string;
 const NFT_CONTRACT_ADDRESS = process.env.NFT_CONTRACT_ADDRESS as string;
@@ -55,14 +56,23 @@ interface NftMintRequestData {
   signature: string;
 }
 
-export async function generateNftMintSignature(
-  organizationName: string,
-  repositoryName: string,
-  issueId: string,
-  beneficiary: string,
-  username: string,
-  contributionType: string
-) {
+type GenerateNftMintSignatureParams = {
+  organizationName: string;
+  repositoryName: string;
+  issueNumber: string;
+  beneficiary: string;
+  username: string;
+  contributionType: string;
+};
+
+export async function generateNftMintSignature({
+  organizationName,
+  repositoryName,
+  issueNumber,
+  beneficiary,
+  username,
+  contributionType,
+}: GenerateNftMintSignatureParams) {
   const { rpc } = getPayoutConfigByNetworkId(NFT_CONTRACT_CHAIN_ID);
 
   let provider;
@@ -83,8 +93,8 @@ export async function generateNftMintSignature(
     beneficiary: beneficiary,
     deadline: MaxUint256,
     keys: keys.map((key) => utils.keccak256(utils.toUtf8Bytes(key))),
-    nonce: MaxUint256,
-    values: [organizationName, repositoryName, issueId, username, contributionType],
+    nonce: BigNumber.from(keccak256(toUtf8Bytes(`${organizationName}${repositoryName}${issueNumber}${username}`))),
+    values: [organizationName, repositoryName, issueNumber, username, contributionType],
   };
 
   const signature = await adminWallet._signTypedData(domain, types, nftMintRequest).catch((error) => {
