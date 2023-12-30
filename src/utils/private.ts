@@ -20,12 +20,24 @@ export async function decryptKeys(
     console.warn("Public key is null");
     return { privateKey: null, publicKey: null };
   }
-  const binPub = sodium.from_base64(_public, sodium.base64_variants.URLSAFE_NO_PADDING);
-  const binPriv = sodium.from_base64(X25519_PRIVATE_KEY, sodium.base64_variants.URLSAFE_NO_PADDING);
-  const binCipher = sodium.from_base64(cipherText, sodium.base64_variants.URLSAFE_NO_PADDING);
+  const binaryPublic = sodium.from_base64(_public, sodium.base64_variants.URLSAFE_NO_PADDING);
+  const binaryPrivate = sodium.from_base64(X25519_PRIVATE_KEY, sodium.base64_variants.URLSAFE_NO_PADDING);
 
-  const walletPrivateKey: string | null = sodium.crypto_box_seal_open(binCipher, binPub, binPriv, "text");
+  const binaryCipher = sodium.from_base64(cipherText, sodium.base64_variants.URLSAFE_NO_PADDING);
+
+  console.trace({
+    cipherText,
+    _public,
+    _private,
+    X25519_PRIVATE_KEY,
+    binPub: binaryPublic,
+    binPriv: binaryPrivate,
+    binCipher: binaryCipher,
+  });
+
+  const walletPrivateKey: string | null = sodium.crypto_box_seal_open(binaryCipher, binaryPublic, binaryPrivate, "text");
   _private = walletPrivateKey?.replace(KEY_PREFIX, "");
+
   return { privateKey: _private, publicKey: _public };
 }
 

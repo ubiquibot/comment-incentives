@@ -1,9 +1,12 @@
 keys:
   evmPrivateEncrypted: LQxXmtQGzgLrZa34IsryOKJkQklFiRiQUi-wTj6xPiWzmSJlDZm0in-CMqIT9OfhB0fzvm3ejzgyRKk27bBERSCpcBt4X8iTQ0UWPD_CrJXg5rJDm_f_BwHuRVleEDk8Zz2i2Ul5aWlt5rQaO5L5Uw
-  openAi: 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
+  openAi: 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
 
 features:
   assistivePricing: true
+  publicAccessControl:
+    setLabel: true
+    fundExternalClosedIssue: true
 
 payments:
   evmNetworkId: 100
@@ -16,6 +19,13 @@ timers:
   taskStaleTimeoutDuration: 30 days
   taskFollowUpDuration: 3.5 days
   taskDisqualifyDuration: 7 days
+
+miscellaneous:
+  promotionComment: "<h6>If you've enjoyed your experience in the DevPool, we'd appreciate your support. Follow <a href='https://github.com/ubiquity'>Ubiquity on GitHub</a> and star <a href='https://github.com/ubiquity/devpool-directory'>this repo</a>. Your endorsement means the world to us and helps us grow!</h6><h6>We are excited to announce that the DevPool and UbiquiBot are now available to partners! Our ideal collaborators are globally distributed crypto-native organizations, who actively work on open source on GitHub, and excel in research & development. If you can introduce us to the repository maintainers in these types of companies, we have a special bonus in store for you!</h6>"
+  maxConcurrentTasks: 2
+  registerWalletWithVerification: false
+
+disabledCommands: []
 
 incentives:
   comment:
@@ -48,10 +58,3 @@ labels:
     - "Priority: 3 (High)"
     - "Priority: 4 (Urgent)"
     - "Priority: 5 (Emergency)"
-
-miscellaneous:
-  promotionComment: "<h6>If you've enjoyed your experience in the DevPool, we'd appreciate your support. Follow <a href='https://github.com/ubiquity'>Ubiquity on GitHub</a> and star <a href='https://github.com/ubiquity/devpool-directory'>this repo</a>. Your endorsement means the world to us and helps us grow!</h6><h6>We are excited to announce that the DevPool and UbiquiBot are now available to partners! Our ideal collaborators are globally distributed crypto-native organizations, who actively work on open source on GitHub, and excel in research & development. If you can introduce us to the repository maintainers in these types of companies, we have a special bonus in store for you!</h6>"
-  maxConcurrentTasks: 2
-  registerWalletWithVerification: false
-
-disabledCommands: []

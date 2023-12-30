@@ -3,8 +3,8 @@ import Decimal from "decimal.js";
 import { BigNumber, ethers } from "ethers";
 import { keccak256, toUtf8Bytes } from "ethers/lib/utils";
 import { getPayoutConfigByNetworkId } from "../../helpers/payout";
-import { decryptKeys } from "../../utils/private";
 import { BotConfig } from "../../types/payload";
+import { decryptKeys } from "../../utils/private";
 
 export async function generatePermit2Signature({
   beneficiary,
@@ -16,6 +16,8 @@ export async function generatePermit2Signature({
     payments: { evmNetworkId },
     keys: { evmPrivateEncrypted },
   } = config;
+
+  console.trace({ config });
 
   if (!evmPrivateEncrypted) throw console.warn("No bot wallet private key defined");
   const { rpc, paymentToken } = getPayoutConfigByNetworkId(evmNetworkId);

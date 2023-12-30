@@ -1,11 +1,11 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import { BotConfig, Comment, Issue, User } from "../../types/payload";
+import { BotConfig, GitHubComment, GitHubIssue, GitHubUser } from "../../types/payload";
 import { generatePermits } from "./generate-permits";
 import { aggregateAndScoreContributions } from "./score-sources";
 import { sumTotalScores } from "./sum-total-scores-per-contributor";
 
-export function botCommandsAndHumanCommentsFilter(comment: Comment) {
+export function botCommandsAndHumanCommentsFilter(comment: GitHubComment) {
   return !comment.body.startsWith("/") /* No Commands */ && comment.user.type === "User"; /* No Bots */
 }
 
@@ -34,11 +34,11 @@ export async function issueClosed({
 }
 
 interface IssueClosedParams {
-  issue: Issue;
-  issueComments: Comment[];
+  issue: GitHubIssue;
+  issueComments: GitHubComment[];
   openAi: OpenAI;
-  repoCollaborators: User[];
-  pullRequestComments: Comment[];
+  repoCollaborators: GitHubUser[];
+  pullRequestComments: GitHubComment[];
   config: BotConfig;
   supabase: SupabaseClient;
 }

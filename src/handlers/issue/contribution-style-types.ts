@@ -1,9 +1,9 @@
-import { User } from "../../types/payload";
+import { GitHubUser } from "../../types/payload";
 
-type All = User[] | User | null;
+type All = GitHubUser[] | GitHubUser | null;
 
 type Assignee = All;
-type Issuer = User;
+type Issuer = GitHubUser;
 type Collaborator = All;
 type Contributor = All;
 

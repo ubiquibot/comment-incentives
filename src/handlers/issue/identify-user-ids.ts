@@ -1,10 +1,10 @@
-import { Comment, Issue, User } from "../../types/payload";
+import { GitHubComment, GitHubIssue, GitHubUser } from "../../types/payload";
 import { ContributorClasses } from "./contribution-style-types";
 
 export async function sortUsersByClass(
-  issue: Issue,
-  contributorComments: Comment[],
-  repoCollaborators: User[]
+  issue: GitHubIssue,
+  contributorComments: GitHubComment[],
+  repoCollaborators: GitHubUser[]
 ): Promise<ContributorClasses> {
   const { issuer, assignees, collaborators, contributors } = await filterUsers(
     issue,
@@ -15,21 +15,21 @@ export async function sortUsersByClass(
   return returnValues(issuer, assignees, collaborators, contributors);
 }
 
-async function filterUsers(issue: Issue, contributorComments: Comment[], collaborators: User[]) {
+async function filterUsers(issue: GitHubIssue, contributorComments: GitHubComment[], collaborators: GitHubUser[]) {
   const issuer = issue.user;
-  const assignees = issue.assignees.filter((assignee): assignee is User => assignee !== null);
+  const assignees = issue.assignees.filter((assignee): assignee is GitHubUser => assignee !== null);
 
-  const allRoleUsers: User[] = [
+  const allRoleUsers: GitHubUser[] = [
     issuer,
-    ...assignees.filter((user): user is User => user !== null),
-    ...collaborators.filter((user): user is User => user !== null),
+    ...assignees.filter((user): user is GitHubUser => user !== null),
+    ...collaborators.filter((user): user is GitHubUser => user !== null),
   ];
   const humanUsersWhoCommented = contributorComments
     .filter((comment) => comment.user.type === "User")
     .map((comment) => comment.user);
 
   const contributors = humanUsersWhoCommented.filter(
-    (user: User) => !allRoleUsers.some((_user) => _user?.id === user.id)
+    (user: GitHubUser) => !allRoleUsers.some((_user) => _user?.id === user.id)
   );
   const uniqueContributors = Array.from(new Map(contributors.map((user) => [user.id, user])).values());
   return {
@@ -41,10 +41,10 @@ async function filterUsers(issue: Issue, contributorComments: Comment[], collabo
 }
 
 function returnValues(
-  issuer: User,
-  assignees: User[],
-  collaborators: User[],
-  contributors: User[]
+  issuer: GitHubUser,
+  assignees: GitHubUser[],
+  collaborators: GitHubUser[],
+  contributors: GitHubUser[]
 ): ContributorClasses {
   return {
     "Issue Issuer Comment": issuer,
