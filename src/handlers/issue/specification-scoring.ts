@@ -11,11 +11,11 @@ import { ContributorView } from "./contribution-style-types";
 export async function specificationScoring({
   issue,
   view,
-  repoCollaborators,
+  collaborators,
 }: {
   issue: GitHubIssue;
   view: ContributorView;
-  repoCollaborators: GitHubUser[];
+  collaborators: GitHubUser[];
 }): Promise<UserScoreDetails[]> {
   // const logger = Runtime.getState().logger;
   const userScoreDetails = [] as UserScoreDetails[];
@@ -29,7 +29,7 @@ export async function specificationScoring({
     issue,
     comments: [issueAsComment],
     view,
-    repoCollaborators,
+    collaborators,
   });
   const scoreDetails = addRelevanceAndFormatScoring(RELEVANT, formatting);
   for (const user in scoreDetails) {

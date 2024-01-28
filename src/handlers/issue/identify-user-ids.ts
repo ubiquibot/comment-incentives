@@ -4,15 +4,11 @@ import { ContributorClasses } from "./contribution-style-types";
 export async function sortUsersByClass(
   issue: GitHubIssue,
   contributorComments: GitHubComment[],
-  repoCollaborators: GitHubUser[]
+  collaborators: GitHubUser[]
 ): Promise<ContributorClasses> {
-  const { issuer, assignees, collaborators, contributors } = await filterUsers(
-    issue,
-    contributorComments,
-    repoCollaborators
-  );
+  const filtered = await filterUsers(issue, contributorComments, collaborators);
 
-  return returnValues(issuer, assignees, collaborators, contributors);
+  return returnValues(filtered.issuer, filtered.assignees, filtered.collaborators, filtered.contributors);
 }
 
 async function filterUsers(issue: GitHubIssue, contributorComments: GitHubComment[], collaborators: GitHubUser[]) {

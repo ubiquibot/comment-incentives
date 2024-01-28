@@ -6,12 +6,38 @@ import OpenAI from "openai";
 import { checkEnvironmentVariables } from "./check-env";
 import { issueClosed } from "./handlers/issue/issue-closed";
 import { getLinkedPullRequests } from "./helpers/get-linked-issues-and-pull-requests";
-import { BotConfig, GitHubComment, GitHubEvent, GitHubIssue } from "./types/payload";
+import { BotConfig, GitHubComment, GitHubEvent, GitHubIssue, GitHubUser } from "./types/payload";
+import { generateInstallationAccessToken } from "./utils/generate-access-token";
 import { generateConfiguration } from "./utils/generate-configuration";
 
-export const octokit: Octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+async function getAuthenticatedOctokit() {
+  const { appId, privateKey } = checkEnvironmentVariables();
+  const webhookPayload = github.context.payload;
+  const inputs = webhookPayload.inputs as DelegatedComputeInputs; //as ExampleInputs;
+  const originRepositoryAuthenticationToken = await generateInstallationAccessToken(
+    appId,
+    privateKey,
+    inputs.installationId
+  );
+  const authenticatedOctokit = new Octokit({ auth: originRepositoryAuthenticationToken });
+  return authenticatedOctokit;
+}
 
-run()
+async function postAuthenticatedRunResult(result: string) {
+  const octokit = await getAuthenticatedOctokit();
+  const inputs = github.context.payload.inputs as DelegatedComputeInputs;
+
+  return await octokit.rest.issues.createComment({
+    owner: inputs.issueOwner,
+    repo: inputs.issueRepository,
+    issue_number: Number(inputs.issueNumber),
+    body: result,
+  });
+}
+
+getAuthenticatedOctokit()
+  .then(run)
+  .then(postAuthenticatedRunResult)
   .then((result) => core.setOutput("result", result))
   .catch((error) => {
     console.error(error);
@@ -20,66 +46,93 @@ run()
 
 interface DelegatedComputeInputs {
   eventName: GitHubEvent;
-  organization: string;
   issueOwner: string;
   issueRepository: string;
   issueNumber: string;
-  repoCollaborators: string;
+  collaborators: string;
+  installationId: string;
 }
 
-async function run() {
-  const { SUPABASE_URL, SUPABASE_KEY } = checkEnvironmentVariables();
-  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+async function run(authenticatedOctokit: Octokit) {
+  const { SUPABASE_URL, SUPABASE_KEY, openAi } = checkEnvironmentVariables();
   const webhookPayload = github.context.payload;
-  const inputs = webhookPayload.inputs as DelegatedComputeInputs;
+  const inputs = webhookPayload.inputs as DelegatedComputeInputs; //as ExampleInputs;
+  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   console.trace({ inputs });
 
   const eventName = inputs.eventName;
   if (GitHubEvent.ISSUES_CLOSED === eventName) {
-    return await issueClosedEventHandler(supabaseClient, inputs);
+    return await issueClosedEventHandler(supabaseClient, openAi, authenticatedOctokit, inputs);
   } else {
     throw new Error(`Event ${eventName} is not supported`);
   }
 }
 
-async function issueClosedEventHandler(supabaseClient: SupabaseClient, inputs: DelegatedComputeInputs) {
+async function issueClosedEventHandler(
+  supabaseClient: SupabaseClient,
+  openAi: OpenAI,
+  authenticatedOctokit: Octokit,
+  inputs: DelegatedComputeInputs
+) {
   const issueNumber = Number(inputs.issueNumber);
-  const issue = await getIssue(inputs.issueOwner, inputs.issueRepository, issueNumber);
-  const issueComments = await getIssueComments(inputs.issueOwner, inputs.issueRepository, issueNumber);
-  const pullRequestComments = await getPullRequestComments(inputs.issueOwner, inputs.issueRepository, issueNumber);
+  const issue = await getIssue(authenticatedOctokit, inputs.issueOwner, inputs.issueRepository, issueNumber);
+  const issueComments = await getIssueComments(
+    authenticatedOctokit,
+    inputs.issueOwner,
+    inputs.issueRepository,
+    issueNumber
+  );
+  const pullRequestComments = await getPullRequestComments(
+    authenticatedOctokit,
+    inputs.issueOwner,
+    inputs.issueRepository,
+    issueNumber
+  );
 
-  const openAi = getOpenAi();
-  console.trace({ inputs });
-  const config = await getConfig(inputs.organization, inputs.issueOwner, inputs.issueRepository);
+  const config = await getConfig(authenticatedOctokit, inputs.issueOwner, inputs.issueRepository);
+
+  const collaboratorsParsed = JSON.parse(inputs.collaborators);
+
+  const collaborators = await Promise.all(
+    collaboratorsParsed.map((login: GitHubUser["login"]) => getUser(authenticatedOctokit, login))
+  );
 
   const result: string = await issueClosed({
     issue,
     issueComments,
     pullRequestComments,
-    repoCollaborators: JSON.parse(inputs.repoCollaborators),
+    collaborators,
     openAi,
     config,
     supabase: supabaseClient,
   });
 
-  const clipped = result.replace(/<!--[\s\S]*?-->/g, "");
-  return clipped
-  // return JSON.stringify({ body: clipped });
-  // const compressedString = zlib.gzipSync(Buffer.from(clipped));
+  return result;
 
-  // console.trace({
-  //   clippedLength: clipped.length,
-  //   compressedLength: compressedString.length,
-  // });
-
-  // return compressedString.toJSON();
+  // const clipped = result.replace(/<!--[\s\S]*?-->/g, "");
+  // return clipped;
 }
 
-// TODO: finish implementing these functions
-async function getIssue(owner: string, repository: string, issueNumber: number): Promise<GitHubIssue> {
+async function getUser(authenticatedOctokit: Octokit, username: string): Promise<GitHubUser> {
   try {
-    const { data: issue } = await octokit.rest.issues.get({
+    const { data: user } = await authenticatedOctokit.rest.users.getByUsername({
+      username: username,
+    });
+    return user as GitHubUser;
+  } catch (e: unknown) {
+    throw new Error("fetching user failed!");
+  }
+}
+
+async function getIssue(
+  authenticatedOctokit: Octokit,
+  owner: string,
+  repository: string,
+  issueNumber: number
+): Promise<GitHubIssue> {
+  try {
+    const { data: issue } = await authenticatedOctokit.rest.issues.get({
       owner: owner,
       repo: repository,
       issue_number: issueNumber,
@@ -91,13 +144,14 @@ async function getIssue(owner: string, repository: string, issueNumber: number):
 }
 
 async function getIssueComments(
+  authenticatedOctokit: Octokit,
   owner: string,
   repository: string,
   issueNumber: number,
   format: "raw" | "html" | "text" | "full" = "raw"
 ): Promise<GitHubComment[]> {
   try {
-    const comments = (await octokit.paginate(octokit.rest.issues.listComments, {
+    const comments = (await authenticatedOctokit.paginate(authenticatedOctokit.rest.issues.listComments, {
       owner,
       repo: repository,
       issue_number: issueNumber,
@@ -112,6 +166,7 @@ async function getIssueComments(
   }
 }
 async function getPullRequestComments(
+  authenticatedOctokit: Octokit,
   owner: string,
   repository: string,
   issueNumber: number
@@ -119,7 +174,9 @@ async function getPullRequestComments(
   const pullRequestComments: GitHubComment[] = [];
   const linkedPullRequests = await getLinkedPullRequests({ owner, repository, issue: issueNumber });
   if (linkedPullRequests.length) {
-    const linkedCommentsPromises = linkedPullRequests.map((pull) => getIssueComments(owner, repository, pull.number));
+    const linkedCommentsPromises = linkedPullRequests.map((pull) =>
+      getIssueComments(authenticatedOctokit, owner, repository, pull.number)
+    );
     const linkedCommentsResolved = await Promise.all(linkedCommentsPromises);
     for (const linkedComments of linkedCommentsResolved) {
       pullRequestComments.push(...linkedComments);
@@ -128,12 +185,6 @@ async function getPullRequestComments(
   return pullRequestComments;
 }
 
-function getOpenAi(): OpenAI {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error("OPENAI_API_KEY is not set");
-  }
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-}
-async function getConfig(organization: string, owner: string, repository: string): Promise<BotConfig> {
-  return generateConfiguration(organization, owner, repository);
+async function getConfig(authenticatedOctokit: Octokit, owner: string, repository: string): Promise<BotConfig> {
+  return generateConfiguration(authenticatedOctokit, owner, repository);
 }

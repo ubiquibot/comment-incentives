@@ -13,7 +13,7 @@ export async function issueClosed({
   issue,
   issueComments,
   openAi,
-  repoCollaborators,
+  collaborators,
   pullRequestComments,
   config,
   supabase,
@@ -21,7 +21,7 @@ export async function issueClosed({
   const sourceScores = await aggregateAndScoreContributions({
     issue,
     issueComments,
-    repoCollaborators,
+    collaborators,
     openAi,
     pullRequestComments,
   });
@@ -37,7 +37,7 @@ interface IssueClosedParams {
   issue: GitHubIssue;
   issueComments: GitHubComment[];
   openAi: OpenAI;
-  repoCollaborators: GitHubUser[];
+  collaborators: GitHubUser[];
   pullRequestComments: GitHubComment[];
   config: BotConfig;
   supabase: SupabaseClient;
