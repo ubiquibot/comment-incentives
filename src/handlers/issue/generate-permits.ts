@@ -45,19 +45,19 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
     const { data, error } = await supabase.from("users").select("*, wallets(*)").filter("id", "eq", parseInt(userId));
     if (error) throw error;
 
-    const beneficiaryAddress = data.length > 0 ? data[0].wallets.address : "";
+    const beneficiaryAddress = data.length > 0 ? data[0].wallets.address : null;
 
-    const permit = await generatePermit2Signature({
+    const permit = beneficiaryAddress ? await generatePermit2Signature({
       beneficiary: beneficiaryAddress,
       amount: tokenAmount,
       userId: userId,
       config,
-    });
+    }) : null;
 
     permits.push(permit);
 
     const html = generateHtml({
-      permit: permit.url,
+      permit: permit ? permit.url : null,
       tokenAmount,
       tokenSymbol,
       contributorName,
@@ -82,12 +82,13 @@ function generateHtml({
       <b
         ><h3>
           <a
-            href="${permit.toString()}"
+            href="${permit ? permit.toString() : '#'}"
           >
             [ ${tokenAmount} ${tokenSymbol} ]</a
           >
         </h3>
-        <h6>@${contributorName}</h6></b
+        <h6>@${contributorName}</h6>
+        <h6>@${!permit ? ' Wallet not provided.' : '' }</h6></b
       >
     </summary>
     ${contributionsOverviewTable}
@@ -241,7 +242,7 @@ function zeroToHyphen(value: number | Decimal) {
 }
 
 interface GenerateHtmlParams {
-  permit: URL;
+  permit: URL | null;
   tokenAmount: Decimal;
   tokenSymbol: string;
   contributorName: string;
