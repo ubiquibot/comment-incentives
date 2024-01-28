@@ -88,7 +88,7 @@ function generateHtml({
           >
         </h3>
         <h6>@${contributorName}</h6>
-        <h6>@${!permit ? ' Wallet not provided.' : '' }</h6></b
+        <h5>${!permit ? ' Wallet not provided.' : '' }</h5></b
       >
     </summary>
     ${contributionsOverviewTable}
