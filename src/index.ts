@@ -6,9 +6,10 @@ import OpenAI from "openai";
 import { checkEnvironmentVariables } from "./check-env";
 import { issueClosed } from "./handlers/issue/issue-closed";
 import { getLinkedPullRequests } from "./helpers/get-linked-issues-and-pull-requests";
-import { BotConfig, GitHubComment, GitHubEvent, GitHubIssue, GitHubUser } from "./types/payload";
+import { GitHubComment, GitHubEvent, GitHubIssue, GitHubUser } from "./types/payload";
 import { generateInstallationAccessToken } from "./utils/generate-access-token";
 import { generateConfiguration } from "./utils/generate-configuration";
+import { BotConfig } from "./types/configuration-types";
 
 async function getAuthenticatedOctokit() {
   const { appId, privateKey } = checkEnvironmentVariables();

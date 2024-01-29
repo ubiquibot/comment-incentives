@@ -1,19 +1,19 @@
-import { BigNumber, BigNumberish, ethers, utils } from "ethers";
+import { BigNumber, ethers, utils } from "ethers";
 import { getPayoutConfigByNetworkId } from "../../helpers/payout";
 import { MaxUint256 } from "@uniswap/permit2-sdk";
 import { keccak256, toUtf8Bytes } from "ethers/lib/utils";
 
 const NFT_MINTER_PRIVATE_KEY = process.env.NFT_MINTER_PRIVATE_KEY as string;
-const NFT_CONTRACT_ADDRESS = process.env.NFT_CONTRACT_ADDRESS as string;
-const NFT_CONTRACT_CHAIN_ID = parseInt(process.env.NFT_CONTRACT_CHAIN_ID as string);
+const NFT_CONTRACT_ADDRESS = "0x6a87f05a74AB2EC25D1Eea0a3Cd24C3A2eCfF3E0";
+const NFT_CONTRACT_NETWORK_ID = 100;
 const SIGNING_DOMAIN_NAME = "NftReward-Domain";
 const SIGNING_DOMAIN_VERSION = "1";
 
-interface NftMintRequest {
+interface Erc721PermitSignatureData {
   beneficiary: string;
-  deadline: BigNumberish;
+  deadline: BigNumber;
   keys: string[];
-  nonce: BigNumberish;
+  nonce: BigNumber;
   values: string[];
 }
 
@@ -21,7 +21,7 @@ const domain = {
   name: SIGNING_DOMAIN_NAME,
   version: SIGNING_DOMAIN_VERSION,
   verifyingContract: NFT_CONTRACT_ADDRESS,
-  chainId: NFT_CONTRACT_CHAIN_ID,
+  chainId: NFT_CONTRACT_NETWORK_ID,
 };
 
 const types = {
@@ -42,7 +42,7 @@ const keys = [
   "GITHUB_CONTRIBUTION_TYPE",
 ];
 
-interface NftMintRequestData {
+interface Erc721PermitTransactionData {
   request: {
     beneficiary: string;
     deadline: string;
@@ -56,24 +56,26 @@ interface NftMintRequestData {
   signature: string;
 }
 
-type GenerateNftMintSignatureParams = {
+type GenerateErc721PermitSignatureParams = {
   organizationName: string;
   repositoryName: string;
+  issueId: string;
   issueNumber: string;
   beneficiary: string;
   username: string;
   contributionType: string;
 };
 
-export async function generateNftMintSignature({
+export async function generateErc721PermitSignature({
   organizationName,
   repositoryName,
   issueNumber,
+  issueId,
   beneficiary,
   username,
   contributionType,
-}: GenerateNftMintSignatureParams) {
-  const { rpc } = getPayoutConfigByNetworkId(NFT_CONTRACT_CHAIN_ID);
+}: GenerateErc721PermitSignatureParams) {
+  const { rpc } = getPayoutConfigByNetworkId(NFT_CONTRACT_NETWORK_ID);
 
   let provider;
   let adminWallet;
@@ -89,31 +91,31 @@ export async function generateNftMintSignature({
     throw console.error("Failed to instantiate wallet", error);
   }
 
-  const nftMintRequest: NftMintRequest = {
+  const erc721SignatureData: Erc721PermitSignatureData = {
     beneficiary: beneficiary,
     deadline: MaxUint256,
     keys: keys.map((key) => utils.keccak256(utils.toUtf8Bytes(key))),
-    nonce: BigNumber.from(keccak256(toUtf8Bytes(`${organizationName}${repositoryName}${issueNumber}${username}`))),
+    nonce: BigNumber.from(keccak256(toUtf8Bytes(issueId))),
     values: [organizationName, repositoryName, issueNumber, username, contributionType],
   };
 
-  const signature = await adminWallet._signTypedData(domain, types, nftMintRequest).catch((error) => {
+  const signature = await adminWallet._signTypedData(domain, types, erc721SignatureData).catch((error) => {
     throw console.error("Failed to sign typed data", error);
   });
 
   const nftMetadata: Record<string, string> = {};
 
   keys.forEach((element, index) => {
-    nftMetadata[element] = nftMintRequest.values[index];
+    nftMetadata[element] = erc721SignatureData.values[index];
   });
 
-  const transactionData: NftMintRequestData = {
+  const erc721Data: Erc721PermitTransactionData = {
     request: {
-      beneficiary: nftMintRequest.beneficiary,
-      deadline: nftMintRequest.deadline.toString(),
-      keys: nftMintRequest.keys,
-      nonce: nftMintRequest.nonce.toString(),
-      values: nftMintRequest.values,
+      beneficiary: erc721SignatureData.beneficiary,
+      deadline: erc721SignatureData.deadline.toString(),
+      keys: erc721SignatureData.keys,
+      nonce: erc721SignatureData.nonce.toString(),
+      values: erc721SignatureData.values,
     },
     nftMetadata,
     nftAddress: NFT_CONTRACT_ADDRESS,
@@ -121,7 +123,7 @@ export async function generateNftMintSignature({
     signature: signature,
   };
 
-  console.info("Generated nft mint signature", { transactionData });
+  console.info("Generated ERC721 permit signature", { erc721Data });
 
-  return transactionData;
+  return erc721Data;
 }

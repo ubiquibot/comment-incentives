@@ -4,11 +4,12 @@ import { stringify } from "yaml";
 import { getTokenSymbol } from "../../helpers/contracts";
 import { getPayoutConfigByNetworkId } from "../../helpers/payout";
 import structuredMetadata from "../../shared/structured-metadata";
-import { BotConfig, GitHubIssue } from "../../types/payload";
-import { generatePermit2Signature } from "./generate-permit-2-signature";
+import { GitHubIssue } from "../../types/payload";
+import { generateErc20PermitSignature } from "./generate-erc20-permit-signature";
 import { UserScoreTotals } from "./issue-shared-types";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { generateNftMintSignature } from "./generate-nft-mint-signature";
+import { generateErc721PermitSignature } from "./generate-erc721-permit-signature";
+import { BotConfig } from "../../types/configuration-types";
 
 type TotalsById = { [userId: string]: UserScoreTotals };
 
@@ -51,37 +52,35 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
 
     const beneficiaryAddress = data.length > 0 ? data[0].wallets.address : "";
 
-    const permits = [];
-    const permit = await generatePermit2Signature({
+    const erc20Permits = [];
+    const permit = await generateErc20PermitSignature({
       beneficiary: beneficiaryAddress,
       amount: tokenAmount,
-      userId: userId,
-      organizationName: issue.repository_url.split("/").slice(-2)[0],
-      repositoryName: issue.repository_url.split("/").slice(-1)[0],
-      issueNumber: issue.number.toString(),
+      issueId: issue.node_id,
       config,
     });
-    permits.push(permit);
+    erc20Permits.push(permit);
     allTxs.push(permit);
 
-    const nftMints = [];
+    const erc721Permits = [];
     if (isNftRewardEnabled && userTotals.details.length > 0) {
       const contributions = userTotals.details.map((detail) => detail.contribution).join(",");
-      const nftMint = await generateNftMintSignature({
+      const nftMint = await generateErc721PermitSignature({
         organizationName: issue.repository_url.split("/").slice(-2)[0],
         repositoryName: issue.repository_url.split("/").slice(-1)[0],
         issueNumber: issue.number.toString(),
+        issueId: issue.node_id,
         beneficiary: beneficiaryAddress,
         username: contributorName,
         contributionType: contributions,
       });
-      nftMints.push(nftMint);
+      erc721Permits.push(nftMint);
       allTxs.push(nftMint);
     }
 
     const claimData = [
-      ...permits.map((permit) => ({ type: "permit", ...permit })),
-      ...nftMints.map((nftMint) => ({ type: "nft-mint", ...nftMint })),
+      ...erc20Permits.map((permit) => ({ type: "erc20-permit", ...permit })),
+      ...erc721Permits.map((nftMint) => ({ type: "erc721-permit", ...nftMint })),
     ];
     const base64encodedClaimData = Buffer.from(JSON.stringify(claimData)).toString("base64");
     const claimUrl = new URL("https://pay.ubq.fi/");
@@ -99,6 +98,7 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
   }
   return { html: htmlArray.join("\n"), allTxs };
 }
+
 function generateHtml({
   claimUrl,
   tokenAmount,
