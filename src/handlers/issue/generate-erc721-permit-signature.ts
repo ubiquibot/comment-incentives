@@ -119,7 +119,7 @@ export async function generateErc721PermitSignature({
     },
     nftMetadata,
     nftAddress: NFT_CONTRACT_ADDRESS,
-    networkId: NFT_CONTRACT_CHAIN_ID,
+    networkId: NFT_CONTRACT_NETWORK_ID,
     signature: signature,
   };
 
