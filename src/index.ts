@@ -172,7 +172,7 @@ async function getPullRequestComments(
   issueNumber: number
 ): Promise<GitHubComment[]> {
   const pullRequestComments: GitHubComment[] = [];
-  const linkedPullRequests = await getLinkedPullRequests({ owner, repository, issue: issueNumber });
+  const linkedPullRequests = await getLinkedPullRequests({ authenticatedOctokit, owner, repository, issue: issueNumber });
   if (linkedPullRequests.length) {
     const linkedCommentsPromises = linkedPullRequests.map((pull) =>
       getIssueComments(authenticatedOctokit, owner, repository, pull.number)
