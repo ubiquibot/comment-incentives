@@ -49,7 +49,7 @@ export async function getLinkedPullRequests(
 ): Promise<GetLinkedResults[]> {
   // const logger = context.logger;
   const collection = [] as GetLinkedResults[];
-  const pulls = await getAllPullRequests(authenticatedOctokit, owner, repository);
+  const pulls = await getAllPullRequests(authenticatedOctokit, owner, repository, "all");
   const currentIssue = await authenticatedOctokit.issues.get({
     owner,
     repo: repository,
