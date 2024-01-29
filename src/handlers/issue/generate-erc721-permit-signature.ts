@@ -5,7 +5,6 @@ import { keccak256, toUtf8Bytes } from "ethers/lib/utils";
 
 const NFT_MINTER_PRIVATE_KEY = process.env.NFT_MINTER_PRIVATE_KEY as string;
 const NFT_CONTRACT_ADDRESS = "0x6a87f05a74AB2EC25D1Eea0a3Cd24C3A2eCfF3E0";
-const NFT_CONTRACT_NETWORK_ID = 100;
 const SIGNING_DOMAIN_NAME = "NftReward-Domain";
 const SIGNING_DOMAIN_VERSION = "1";
 
@@ -16,13 +15,6 @@ interface Erc721PermitSignatureData {
   nonce: BigNumber;
   values: string[];
 }
-
-const domain = {
-  name: SIGNING_DOMAIN_NAME,
-  version: SIGNING_DOMAIN_VERSION,
-  verifyingContract: NFT_CONTRACT_ADDRESS,
-  chainId: NFT_CONTRACT_NETWORK_ID,
-};
 
 const types = {
   MintRequest: [
@@ -64,9 +56,11 @@ type GenerateErc721PermitSignatureParams = {
   beneficiary: string;
   username: string;
   contributionType: string;
+  networkId: number;
 };
 
 export async function generateErc721PermitSignature({
+  networkId,
   organizationName,
   repositoryName,
   issueNumber,
@@ -75,7 +69,7 @@ export async function generateErc721PermitSignature({
   username,
   contributionType,
 }: GenerateErc721PermitSignatureParams) {
-  const { rpc } = getPayoutConfigByNetworkId(NFT_CONTRACT_NETWORK_ID);
+  const { rpc } = getPayoutConfigByNetworkId(networkId);
 
   let provider;
   let adminWallet;
@@ -99,9 +93,20 @@ export async function generateErc721PermitSignature({
     values: [organizationName, repositoryName, issueNumber, username, contributionType],
   };
 
-  const signature = await adminWallet._signTypedData(domain, types, erc721SignatureData).catch((error) => {
-    throw console.error("Failed to sign typed data", error);
-  });
+  const signature = await adminWallet
+    ._signTypedData(
+      {
+        name: SIGNING_DOMAIN_NAME,
+        version: SIGNING_DOMAIN_VERSION,
+        verifyingContract: NFT_CONTRACT_ADDRESS,
+        chainId: networkId,
+      },
+      types,
+      erc721SignatureData
+    )
+    .catch((error) => {
+      throw console.error("Failed to sign typed data", error);
+    });
 
   const nftMetadata: Record<string, string> = {};
 
@@ -119,7 +124,7 @@ export async function generateErc721PermitSignature({
     },
     nftMetadata,
     nftAddress: NFT_CONTRACT_ADDRESS,
-    networkId: NFT_CONTRACT_NETWORK_ID,
+    networkId: networkId,
     signature: signature,
   };
 

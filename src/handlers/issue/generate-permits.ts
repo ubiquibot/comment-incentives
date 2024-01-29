@@ -27,6 +27,7 @@ export async function generatePermits(
 async function generateComment(totals: TotalsById, issue: GitHubIssue, config: BotConfig, supabase: SupabaseClient) {
   const {
     features: { isNftRewardEnabled },
+    payments: { evmNetworkId },
   } = config;
   const { rpc, paymentToken } = getPayoutConfigByNetworkId(config.payments.evmNetworkId);
 
@@ -66,6 +67,7 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
     if (isNftRewardEnabled && userTotals.details.length > 0) {
       const contributions = userTotals.details.map((detail) => detail.contribution).join(",");
       const nftMint = await generateErc721PermitSignature({
+        networkId: evmNetworkId,
         organizationName: issue.repository_url.split("/").slice(-2)[0],
         repositoryName: issue.repository_url.split("/").slice(-1)[0],
         issueNumber: issue.number.toString(),
