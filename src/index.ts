@@ -76,19 +76,23 @@ async function issueClosedEventHandler(
   inputs: DelegatedComputeInputs
 ) {
   const issueNumber = Number(inputs.issueNumber);
+  console.trace(issueNumber);
   const issue = await getIssue(authenticatedOctokit, inputs.issueOwner, inputs.issueRepository, issueNumber);
+  console.trace(issue);
   const issueComments = await getIssueComments(
     authenticatedOctokit,
     inputs.issueOwner,
     inputs.issueRepository,
     issueNumber
   );
+  console.trace(issueComments);
   const pullRequestComments = await getPullRequestComments(
     authenticatedOctokit,
     inputs.issueOwner,
     inputs.issueRepository,
     issueNumber
   );
+  console.trace(pullRequestComments);
 
   const config = await getConfig(authenticatedOctokit, inputs.issueOwner, inputs.issueRepository);
 
