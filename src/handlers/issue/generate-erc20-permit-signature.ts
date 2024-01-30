@@ -10,6 +10,7 @@ export async function generateErc20PermitSignature({
   beneficiary,
   amount,
   issueId,
+  userId,
   config,
 }: GenerateErc20PermitSignatureParams) {
   const {
@@ -47,7 +48,7 @@ export async function generateErc20PermitSignature({
       amount: ethers.utils.parseUnits(amount.toString(), 18),
     },
     spender: beneficiary,
-    nonce: BigNumber.from(keccak256(toUtf8Bytes(issueId))),
+    nonce: BigNumber.from(keccak256(toUtf8Bytes(`${userId}-${issueId}`))),
     deadline: MaxUint256,
   };
 
@@ -88,6 +89,7 @@ interface GenerateErc20PermitSignatureParams {
   amount: Decimal;
 
   issueId: string;
+  userId: string;
   config: BotConfig;
 }
 
