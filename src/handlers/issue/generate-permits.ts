@@ -59,6 +59,7 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
       beneficiary: beneficiaryAddress,
       amount: tokenAmount,
       issueId: issue.node_id,
+      userId: userTotals.user.node_id,
       config,
     });
     erc20Permits.push(permit);
@@ -75,6 +76,7 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
         issueId: issue.node_id,
         beneficiary: beneficiaryAddress,
         username: contributorName,
+        userId: userTotals.user.node_id,
         contributionType: contributions,
       });
       erc721Permits.push(nftMint);

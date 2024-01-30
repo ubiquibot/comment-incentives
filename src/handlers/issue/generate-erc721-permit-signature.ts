@@ -55,6 +55,7 @@ type GenerateErc721PermitSignatureParams = {
   issueNumber: string;
   beneficiary: string;
   username: string;
+  userId: string;
   contributionType: string;
   networkId: number;
 };
@@ -67,6 +68,7 @@ export async function generateErc721PermitSignature({
   issueId,
   beneficiary,
   username,
+  userId,
   contributionType,
 }: GenerateErc721PermitSignatureParams) {
   const { rpc } = getPayoutConfigByNetworkId(networkId);
@@ -89,7 +91,7 @@ export async function generateErc721PermitSignature({
     beneficiary: beneficiary,
     deadline: MaxUint256,
     keys: keys.map((key) => utils.keccak256(utils.toUtf8Bytes(key))),
-    nonce: BigNumber.from(keccak256(toUtf8Bytes(issueId))),
+    nonce: BigNumber.from(keccak256(toUtf8Bytes(`${userId}-${issueId}`))),
     values: [organizationName, repositoryName, issueNumber, username, contributionType],
   };
 
