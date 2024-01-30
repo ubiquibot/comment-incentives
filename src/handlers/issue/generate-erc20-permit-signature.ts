@@ -3,15 +3,15 @@ import Decimal from "decimal.js";
 import { BigNumber, ethers } from "ethers";
 import { keccak256, toUtf8Bytes } from "ethers/lib/utils";
 import { getPayoutConfigByNetworkId } from "../../helpers/payout";
-import { BotConfig } from "../../types/payload";
+import { BotConfig } from "../../types/configuration-types";
 import { decryptKeys } from "../../utils/private";
 
-export async function generatePermit2Signature({
+export async function generateErc20PermitSignature({
   beneficiary,
   amount,
-  userId,
+  issueId,
   config,
-}: GeneratePermit2SignatureParams) {
+}: GenerateErc20PermitSignatureParams) {
   const {
     payments: { evmNetworkId },
     keys: { evmPrivateEncrypted },
@@ -47,7 +47,7 @@ export async function generatePermit2Signature({
       amount: ethers.utils.parseUnits(amount.toString(), 18),
     },
     spender: beneficiary,
-    nonce: BigNumber.from(keccak256(toUtf8Bytes(userId))),
+    nonce: BigNumber.from(keccak256(toUtf8Bytes(issueId))),
     deadline: MaxUint256,
   };
 
@@ -61,7 +61,7 @@ export async function generatePermit2Signature({
     throw console.debug("Failed to sign typed data", error);
   });
 
-  const transactionData: TransactionData = {
+  const transactionData: Erc20PermitTransactionData = {
     permit: {
       permitted: {
         token: permitTransferFromData.permitted.token,
@@ -76,38 +76,22 @@ export async function generatePermit2Signature({
     },
     owner: adminWallet.address,
     signature: signature,
+    networkId: evmNetworkId,
   };
 
-  // const transactionDataV2 = {
-  //   token: permitTransferFromData.permitted.token,
-  //   nonce: permitTransferFromData.nonce.toString(),
-  //   deadline: permitTransferFromData.deadline.toString(),
-  //   beneficiary: permitTransferFromData.spender,
-  //   amount: permitTransferFromData.permitted.amount.toString(),
-  // };
+  console.info("Generated ERC20 permit2 signature", transactionData);
 
-  const base64encodedTxData = Buffer.from(JSON.stringify(transactionData)).toString("base64");
-
-  const url = new URL("https://pay.ubq.fi/");
-  url.searchParams.append("claim", base64encodedTxData);
-  url.searchParams.append("network", evmNetworkId.toString());
-
-  console.info("Generated permit2 signature", {
-    transactionData,
-    url: url.toString(),
-  });
-
-  return { transactionData, url };
+  return transactionData;
 }
-interface GeneratePermit2SignatureParams {
+interface GenerateErc20PermitSignatureParams {
   beneficiary: string;
   amount: Decimal;
 
-  userId: string;
+  issueId: string;
   config: BotConfig;
 }
 
-interface TransactionData {
+interface Erc20PermitTransactionData {
   permit: {
     permitted: {
       token: string;
@@ -122,4 +106,5 @@ interface TransactionData {
   };
   owner: string;
   signature: string;
+  networkId: number;
 }

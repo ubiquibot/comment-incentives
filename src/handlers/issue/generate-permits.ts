@@ -1,13 +1,15 @@
 import Decimal from "decimal.js";
 import { stringify } from "yaml";
 
-import { SupabaseClient } from "@supabase/supabase-js";
 import { getTokenSymbol } from "../../helpers/contracts";
 import { getPayoutConfigByNetworkId } from "../../helpers/payout";
 import structuredMetadata from "../../shared/structured-metadata";
-import { BotConfig, GitHubIssue } from "../../types/payload";
-import { generatePermit2Signature } from "./generate-permit-2-signature";
+import { GitHubIssue } from "../../types/payload";
+import { generateErc20PermitSignature } from "./generate-erc20-permit-signature";
 import { UserScoreTotals } from "./issue-shared-types";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { generateErc721PermitSignature } from "./generate-erc721-permit-signature";
+import { BotConfig } from "../../types/configuration-types";
 
 type TotalsById = { [userId: string]: UserScoreTotals };
 
@@ -17,18 +19,22 @@ export async function generatePermits(
   config: BotConfig,
   supabase: SupabaseClient
 ) {
-  const { html: comment, permits } = await generateComment(totals, issue, config, supabase);
-  const metadata = structuredMetadata.create("Permits", { permits, totals });
+  const { html: comment, allTxs } = await generateComment(totals, issue, config, supabase);
+  const metadata = structuredMetadata.create("Transactions", { allTxs, totals });
   return comment.concat("\n", metadata);
 }
 
 async function generateComment(totals: TotalsById, issue: GitHubIssue, config: BotConfig, supabase: SupabaseClient) {
+  const {
+    features: { isNftRewardEnabled },
+    payments: { evmNetworkId },
+  } = config;
   const { rpc, paymentToken } = getPayoutConfigByNetworkId(config.payments.evmNetworkId);
 
   const tokenSymbol = await getTokenSymbol(paymentToken, rpc);
   const htmlArray = [] as string[];
 
-  const permits = [];
+  const allTxs = [];
 
   for (const userId in totals) {
     const userTotals = totals[userId];
@@ -48,17 +54,43 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
     const beneficiaryAddress = data.length > 0 ? data[0].wallets.address : null;
     if(!beneficiaryAddress) continue;
 
-    const permit = await generatePermit2Signature({
+    const erc20Permits = [];
+    const permit = await generateErc20PermitSignature({
       beneficiary: beneficiaryAddress,
       amount: tokenAmount,
-      userId: userId,
+      issueId: issue.node_id,
       config,
     });
+    erc20Permits.push(permit);
+    allTxs.push(permit);
 
-    permits.push(permit);
+    const erc721Permits = [];
+    if (isNftRewardEnabled && userTotals.details.length > 0) {
+      const contributions = userTotals.details.map((detail) => detail.contribution).join(",");
+      const nftMint = await generateErc721PermitSignature({
+        networkId: evmNetworkId,
+        organizationName: issue.repository_url.split("/").slice(-2)[0],
+        repositoryName: issue.repository_url.split("/").slice(-1)[0],
+        issueNumber: issue.number.toString(),
+        issueId: issue.node_id,
+        beneficiary: beneficiaryAddress,
+        username: contributorName,
+        contributionType: contributions,
+      });
+      erc721Permits.push(nftMint);
+      allTxs.push(nftMint);
+    }
+
+    const claimData = [
+      ...erc20Permits.map((permit) => ({ type: "erc20-permit", ...permit })),
+      ...erc721Permits.map((nftMint) => ({ type: "erc721-permit", ...nftMint })),
+    ];
+    const base64encodedClaimData = Buffer.from(JSON.stringify(claimData)).toString("base64");
+    const claimUrl = new URL("https://pay.ubq.fi/");
+    claimUrl.searchParams.append("claim", base64encodedClaimData);
 
     const html = generateHtml({
-      permit: permit.url,
+      claimUrl,
       tokenAmount,
       tokenSymbol,
       contributorName,
@@ -67,10 +99,11 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
     });
     htmlArray.push(html);
   }
-  return { html: htmlArray.join("\n"), permits };
+  return { html: htmlArray.join("\n"), allTxs };
 }
+
 function generateHtml({
-  permit,
+  claimUrl,
   tokenAmount,
   tokenSymbol,
   contributorName,
@@ -83,7 +116,7 @@ function generateHtml({
       <b
         ><h3>
           <a
-            href="${permit.toString()}"
+            href="${claimUrl.toString()}"
           >
             [ ${tokenAmount} ${tokenSymbol} ]</a
           >
@@ -242,7 +275,7 @@ function zeroToHyphen(value: number | Decimal) {
 }
 
 interface GenerateHtmlParams {
-  permit: URL;
+  claimUrl: URL;
   tokenAmount: Decimal;
   tokenSymbol: string;
   contributorName: string;
