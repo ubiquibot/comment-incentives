@@ -1,7 +1,6 @@
 // https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads
 
-import { ObjectOptions, Static, StaticDecode, TProperties, Type } from "@sinclair/typebox";
-import { validHTMLElements } from "../handlers/issue/valid-html-elements";
+import { Static, Type } from "@sinclair/typebox";
 
 const labelSchema = Type.Object({
   id: Type.Number(),
@@ -368,73 +367,6 @@ const githubContentSchema = Type.Object({
     }),
   ]),
 });
-
-function strictObject<T extends TProperties>(obj: T, options?: ObjectOptions) {
-  return Type.Object<T>(obj, { additionalProperties: false, default: {}, ...options });
-}
-
-const htmlEntities = validHTMLElements.map((value) => Type.Literal(value));
-
-export const botConfigSchema = strictObject(
-  {
-    keys: strictObject({
-      evmPrivateEncrypted: Type.Optional(Type.String()),
-      openAi: Type.Optional(Type.String()),
-    }),
-    features: strictObject({
-      assistivePricing: Type.Boolean({ default: false }),
-      defaultLabels: Type.Array(Type.String(), { default: [] }),
-      newContributorGreeting: strictObject({
-        enabled: Type.Boolean({ default: false }),
-        header: Type.String(),
-        displayHelpMenu: Type.Boolean({ default: true }),
-        footer: Type.String(),
-      }),
-      publicAccessControl: strictObject({
-        setLabel: Type.Boolean({ default: true }),
-        fundExternalClosedIssue: Type.Boolean({ default: true }),
-      }),
-    }),
-
-    timers: strictObject({
-      reviewDelayTolerance: Type.Number(),
-      taskStaleTimeoutDuration: Type.Number(),
-      taskFollowUpDuration: Type.Number(),
-      taskDisqualifyDuration: Type.Number(),
-    }),
-    payments: strictObject({
-      maxPermitPrice: Type.Number({ default: Number.MAX_SAFE_INTEGER }),
-      evmNetworkId: Type.Number({ default: 1 }),
-      basePriceMultiplier: Type.Number({ default: 1 }),
-      issueCreatorMultiplier: Type.Number({ default: 1 }),
-    }),
-    disabledCommands: Type.Array(Type.String()),
-    incentives: strictObject({
-      comment: strictObject({
-        elements: Type.Record(Type.Union(htmlEntities), Type.Number({ default: 0 })),
-        totals: strictObject({
-          character: Type.Number({ default: 0, minimum: 0 }),
-          word: Type.Number({ default: 0, minimum: 0 }),
-          sentence: Type.Number({ default: 0, minimum: 0 }),
-          paragraph: Type.Number({ default: 0, minimum: 0 }),
-          comment: Type.Number({ default: 0, minimum: 0 }),
-        }),
-      }),
-    }),
-    labels: strictObject({
-      time: Type.Array(Type.String()),
-      priority: Type.Array(Type.String()),
-    }),
-    miscellaneous: strictObject({
-      maxConcurrentTasks: Type.Number({ default: Number.MAX_SAFE_INTEGER }),
-      promotionComment: Type.String(),
-      registerWalletWithVerification: Type.Boolean({ default: false }),
-      openAiTokenLimit: Type.Number({ default: 100000 }),
-    }),
-  },
-  { default: undefined } // top level object can't have default!
-);
-export type BotConfig = StaticDecode<typeof botConfigSchema>;
 
 export type GithubContent = Static<typeof githubContentSchema>;
 export type Organization = {

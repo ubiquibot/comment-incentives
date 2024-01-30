@@ -1,9 +1,10 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import { BotConfig, GitHubComment, GitHubIssue, GitHubUser } from "../../types/payload";
+import { GitHubComment, GitHubIssue, GitHubUser } from "../../types/payload";
 import { generatePermits } from "./generate-permits";
 import { aggregateAndScoreContributions } from "./score-sources";
 import { sumTotalScores } from "./sum-total-scores-per-contributor";
+import { BotConfig } from "../../types/configuration-types";
 
 export function botCommandsAndHumanCommentsFilter(comment: GitHubComment) {
   return !comment.body.startsWith("/") /* No Commands */ && comment.user.type === "User"; /* No Bots */

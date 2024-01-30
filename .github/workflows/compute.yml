@@ -1,5 +1,4 @@
 name: Delegated Compute Workflow
-
 on:
   workflow_dispatch:
     inputs:
@@ -34,7 +33,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "20.10.0"
-
       - name: Calling action
         uses: ./ # Uses an action in the root directory
         id: callback
