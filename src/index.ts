@@ -77,23 +77,19 @@ async function issueClosedEventHandler(
   inputs: DelegatedComputeInputs
 ) {
   const issueNumber = Number(inputs.issueNumber);
-  console.trace(issueNumber);
   const issue = await getIssue(authenticatedOctokit, inputs.issueOwner, inputs.issueRepository, issueNumber);
-  console.trace(issue);
   const issueComments = await getIssueComments(
     authenticatedOctokit,
     inputs.issueOwner,
     inputs.issueRepository,
     issueNumber
   );
-  console.trace(issueComments);
   const pullRequestComments = await getPullRequestComments(
     authenticatedOctokit,
     inputs.issueOwner,
     inputs.issueRepository,
     issueNumber
   );
-  console.trace(pullRequestComments);
 
   const config = await getConfig(authenticatedOctokit, inputs.issueOwner, inputs.issueRepository);
 
@@ -177,8 +173,7 @@ async function getPullRequestComments(
   issueNumber: number
 ): Promise<GitHubComment[]> {
   const pullRequestComments: GitHubComment[] = [];
-  const linkedPullRequests = await getLinkedPullRequests({ authenticatedOctokit, owner, repository, issue: issueNumber });
-  console.trace("Linked pull requests: ", linkedPullRequests);
+  const linkedPullRequests = await getLinkedPullRequests({ owner, repository, issue: issueNumber });
   if (linkedPullRequests.length) {
     const linkedCommentsPromises = linkedPullRequests.map((pull) =>
       getIssueComments(authenticatedOctokit, owner, repository, pull.number)
