@@ -26,7 +26,7 @@ export async function issueClosed({
     openAi,
     pullRequestComments,
   });
-  console.trace("sourceScores: ",JSON.stringify(sourceScores));
+  console.trace("sourceScores: ",sourceScores);
   // 2. sum total scores will sum the scores of every contribution, and organize them by contributor
   const contributorTotalScores = sumTotalScores(sourceScores);
   // 3. generate permits will generate a payment for every contributor
