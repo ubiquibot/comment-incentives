@@ -108,7 +108,6 @@ export class CommentScoring {
         const wordScoreComment = commentScoreDetails.wordScoreComment;
 
         commentScoreDetails.totalScoreComment = formatScoreComment.plus(wordScoreComment);
-        commentScoreDetails.totalScoreComment = commentScoreDetails.totalScoreComment.mul(commentScoreDetails.relevanceScoreComment);
 
         wordScores.push(wordScoreComment);
         formatScores.push(formatScoreComment);
