@@ -122,7 +122,7 @@ async function getUser(authenticatedOctokit: Octokit, username: string): Promise
     });
     return user as GitHubUser;
   } catch (e: unknown) {
-    throw new Error("fetching user failed!");
+    throw new Error(`fetching user failed! ${e}`);
   }
 }
 
@@ -140,7 +140,7 @@ async function getIssue(
     });
     return issue as GitHubIssue;
   } catch (e: unknown) {
-    throw new Error("fetching issue failed!");
+    throw new Error(`fetching issue failed! ${e}`);
   }
 }
 
@@ -163,7 +163,7 @@ async function getIssueComments(
     })) as GitHubComment[];
     return comments;
   } catch (e: unknown) {
-    throw new Error("Fetching all issue comments failed!");
+    throw new Error(`Fetching all issue comments failed! ${e}`);
   }
 }
 async function getPullRequestComments(

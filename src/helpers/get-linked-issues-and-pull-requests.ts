@@ -54,17 +54,17 @@ export async function getLinkedPullRequests(
     if (parts.length < 4) continue;
 
     // extract the organization name and repo name from the link:(e.g. "
-    const organization = parts[parts.length - 4];
-    const repository = parts[parts.length - 3];
+    const currentOrganization = parts[parts.length - 4];
+    const currentRepository = parts[parts.length - 3];
     const number = Number(parts[parts.length - 1]);
     const href = `https://github.com${relativeHref}`;
 
-    if (`${organization}/${repository}` !== `${owner}/${repository}`) {
+    if (`${currentOrganization}/${currentRepository}` !== `${owner}/${repository}`) {
       // logger.info("Skipping linked pull request from another repository", href);
       continue;
     }
 
-    collection.push({ organization, repository, number, href });
+    collection.push({ organization: currentOrganization, repository: currentRepository, number, href });
   }
 
   return collection;
