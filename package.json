@@ -3,6 +3,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node --import tsx src/index.ts",
+    "test": "jest",
     "preformat": "yarn format:prettier",
     "format": "yarn format:eslint",
     "postformat": "yarn format:cspell",

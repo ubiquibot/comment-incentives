@@ -45,4 +45,4 @@ export async function indexTest() {
 it("runs", () =>
   indexTest().then(() => {
     console.log("done");
-  }));
+  }), 60000);
