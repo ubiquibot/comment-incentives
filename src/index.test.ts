@@ -9,8 +9,8 @@ afterEach(() => {
 const inputs: DelegatedComputeInputs = {
   eventName: "issues.closed" as GitHubEvent.ISSUES_CLOSED,
   issueOwner: "ubiquibot",
-  issueRepository: "production",
-  issueNumber: "84",
+  issueRepository: "comment-incentives",
+  issueNumber: "19",
   collaborators: `["pavlovcik"]`,
   installationId: "37627918", // "ubiquibot-dev" app
 };
@@ -19,8 +19,8 @@ jest.mock("@actions/github", () => {
   const inputs: DelegatedComputeInputs = {
     eventName: "issues.closed" as GitHubEvent.ISSUES_CLOSED,
     issueOwner: "ubiquibot",
-    issueRepository: "production",
-    issueNumber: "84",
+    issueRepository: "comment-incentives",
+    issueNumber: "19",
     collaborators: `["pavlovcik"]`,
     installationId: "37627918", // "ubiquibot-dev" app
   };
@@ -34,15 +34,31 @@ jest.mock("@actions/github", () => {
   };
 });
 
+import fs from "fs";
+import path from "path";
 export async function indexTest() {
   const authenticatedOctokit = await getAuthenticatedOctokit();
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const output = await issueClosedEventHandler(supabaseClient, openAi, authenticatedOctokit, inputs);
-  console.log({ output });
+
+  const timestamp = new Date().getTime();
+  const logFilePath = path.join(__dirname, `${timestamp}.html`);
+
+  fs.writeFile(logFilePath, output, (err) => {
+    if (err) {
+      console.error("Error writing file", err);
+    } else {
+      console.log(`Output written to ${timestamp}.html`);
+    }
+  });
 }
 
-it("runs", () =>
-  indexTest().then(() => {
-    console.log("done");
-  }), 60000);
+it(
+  "runs",
+  () =>
+    indexTest().then(() => {
+      console.log("done");
+    }),
+  60000
+);
