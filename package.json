@@ -1,5 +1,6 @@
 {
   "main": "src/index.ts",
+  "license": "MIT",
   "scripts": {
     "start": "node --import tsx src/index.ts",
     "preformat": "yarn format:prettier",
