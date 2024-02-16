@@ -10,10 +10,10 @@ getAuthenticatedOctokit()
     issueClosedEventHandler(createClient(SUPABASE_URL, SUPABASE_KEY), openAi, authenticatedOctokit, {
       eventName: GitHubEvent.ISSUES_CLOSED,
       issueOwner: "ubiquibot",
-      issueRepository: "comment-incentives",
-      issueNumber: "1",
-      collaborators: `["ubiquibot"]`,
-      installationId: "0",
+      issueRepository: "production",
+      issueNumber: "84",
+      collaborators: `["pavlovcik"]`,
+      installationId: "37627918", // "ubiquibot-dev" app
     })
       .then(() => {
         console.log("issueClosedEventHandler done");
