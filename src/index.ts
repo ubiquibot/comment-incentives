@@ -60,7 +60,7 @@ async function run(authenticatedOctokit: Octokit) {
   const inputs = webhookPayload.inputs as DelegatedComputeInputs; //as ExampleInputs;
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  console.trace({ inputs });
+  console.log({ inputs });
 
   const eventName = inputs.eventName;
   if (GitHubEvent.ISSUES_CLOSED === eventName) {

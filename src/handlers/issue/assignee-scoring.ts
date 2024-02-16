@@ -14,17 +14,37 @@ export async function assigneeScoring({
 }): Promise<UserScoreDetails[]> {
   // get the price label
   const priceLabels = issue.labels.filter((label) => label.name.startsWith("Price: "));
-  if (!priceLabels) throw console.warn("Price label is undefined");
+
+  console.trace({ priceLabels });
+
+  if (!priceLabels.length) {
+    throw console.warn("There are no price labels in this repository.");
+  }
 
   // get the smallest price label
-  const priceLabel = priceLabels
-    .sort((a, b) => {
-      const priceA = parseFloat(a.name.replace("Price: ", ""));
-      const priceB = parseFloat(b.name.replace("Price: ", ""));
-      return priceA - priceB;
-    })[0]
-    .name.match(/\d+(\.\d+)?/)
-    ?.shift();
+  const sortedPriceLabels = priceLabels.sort((a, b) => {
+    const priceA = parseFloat(a.name.replace("Price: ", ""));
+    const priceB = parseFloat(b.name.replace("Price: ", ""));
+    return priceA - priceB;
+  });
+
+  if (!sortedPriceLabels.length) {
+    throw console.warn("There are no sorted price labels.");
+  }
+
+  const smallestPriceLabel = sortedPriceLabels[0];
+
+  if (!smallestPriceLabel) {
+    throw console.warn("Smallest price label is undefined");
+  }
+
+  console.trace({ smallestPriceLabel });
+
+  const priceLabelName = smallestPriceLabel.name;
+
+  const priceLabelMatch = priceLabelName.match(/\d+(\.\d+)?/);
+
+  const priceLabel = priceLabelMatch?.shift();
 
   if (!priceLabel) {
     throw console.warn("Price label is undefined");
