@@ -14,6 +14,7 @@ This is the backend of the UbiquiBot comment incentives system. It is a serverle
 ### Default shared evmPrivateKeyEncrypted
 
 Default shared evmPrivateKeyEncrypted key was generated for new shared account address
-0x3a2E44e10AbEf5CB4a6E492c5ba93d30068d2D95
+0x3a2E44e10AbEf5CB4a6E492c5ba93d30068d2D95 and private key
+a29c749482b5d7e5987895a76f3d23002f3a3e1fabb26d370b7403ddead8926a 
 
 Source https://github.com/ubiquibot/comment-incentives/issues/3#issuecomment-1919082099
