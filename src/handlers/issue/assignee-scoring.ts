@@ -15,10 +15,9 @@ export async function assigneeScoring({
   // get the price label
   const priceLabels = issue.labels.filter((label) => label.name.startsWith("Price: "));
 
-  console.trace({ priceLabels });
-
   if (!priceLabels.length) {
-    throw console.warn("There are no price labels in this repository.");
+    console.warn("There are no price labels in this repository.");
+    return []; // Return an empty array if there are no price labels
   }
 
   // get the smallest price label
@@ -28,26 +27,14 @@ export async function assigneeScoring({
     return priceA - priceB;
   });
 
-  if (!sortedPriceLabels.length) {
-    throw console.warn("There are no sorted price labels.");
-  }
-
   const smallestPriceLabel = sortedPriceLabels[0];
-
-  if (!smallestPriceLabel) {
-    throw console.warn("Smallest price label is undefined");
-  }
-
-  console.trace({ smallestPriceLabel });
-
   const priceLabelName = smallestPriceLabel.name;
-
   const priceLabelMatch = priceLabelName.match(/\d+(\.\d+)?/);
-
   const priceLabel = priceLabelMatch?.shift();
 
   if (!priceLabel) {
-    throw console.warn("Price label is undefined");
+    console.warn("Price label is undefined");
+    return []; // Return an empty array if the price label is undefined
   }
 
   // get the price
@@ -66,11 +53,9 @@ export async function assigneeScoring({
     // return the total
     const details: UserScoreDetails = {
       score: splitReward,
-
       view: view,
       role: "Assignee",
       contribution: "Task",
-
       scoring: {
         issueComments: null,
         reviewComments: null,
