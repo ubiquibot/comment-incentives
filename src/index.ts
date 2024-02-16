@@ -6,12 +6,12 @@ import OpenAI from "openai";
 import { checkEnvironmentVariables } from "./check-env";
 import { issueClosed } from "./handlers/issue/issue-closed";
 import { getLinkedPullRequests } from "./helpers/get-linked-issues-and-pull-requests";
+import { BotConfig } from "./types/configuration-types";
 import { GitHubComment, GitHubEvent, GitHubIssue, GitHubUser } from "./types/payload";
 import { generateInstallationAccessToken } from "./utils/generate-access-token";
 import { generateConfiguration } from "./utils/generate-configuration";
-import { BotConfig } from "./types/configuration-types";
 
-async function getAuthenticatedOctokit() {
+export async function getAuthenticatedOctokit(): Promise<Octokit> {
   const { appId, privateKey } = checkEnvironmentVariables();
   const webhookPayload = github.context.payload;
   const inputs = webhookPayload.inputs as DelegatedComputeInputs; //as ExampleInputs;
@@ -45,7 +45,7 @@ getAuthenticatedOctokit()
     core.setFailed(error);
   });
 
-interface DelegatedComputeInputs {
+export interface DelegatedComputeInputs {
   eventName: GitHubEvent;
   issueOwner: string;
   issueRepository: string;
@@ -60,8 +60,6 @@ async function run(authenticatedOctokit: Octokit) {
   const inputs = webhookPayload.inputs as DelegatedComputeInputs; //as ExampleInputs;
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  console.trace({ inputs });
-
   const eventName = inputs.eventName;
   if (GitHubEvent.ISSUES_CLOSED === eventName) {
     return await issueClosedEventHandler(supabaseClient, openAi, authenticatedOctokit, inputs);
@@ -70,7 +68,7 @@ async function run(authenticatedOctokit: Octokit) {
   }
 }
 
-async function issueClosedEventHandler(
+export async function issueClosedEventHandler(
   supabaseClient: SupabaseClient,
   openAi: OpenAI,
   authenticatedOctokit: Octokit,
