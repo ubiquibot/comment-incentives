@@ -20,7 +20,8 @@ export async function generatePermits(
   supabase: SupabaseClient
 ) {
   const { html: comment, allTxs } = await generateComment(totals, issue, config, supabase);
-  const metadata = structuredMetadata.create("Transactions", { allTxs, totals });
+
+  const metadata = structuredMetadata.create("Transactions", allTxs);
   return comment.concat("\n", metadata);
 }
 
@@ -52,7 +53,7 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
     if (error) throw error;
 
     const beneficiaryAddress = data.length > 0 ? data[0].wallets.address : null;
-    if(!beneficiaryAddress) continue;
+    if (!beneficiaryAddress) continue;
 
     const erc20Permits = [];
     const permit = await generateErc20PermitSignature({

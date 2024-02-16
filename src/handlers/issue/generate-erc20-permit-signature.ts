@@ -18,8 +18,6 @@ export async function generateErc20PermitSignature({
     keys: { evmPrivateEncrypted },
   } = config;
 
-  console.trace({ config });
-
   if (!evmPrivateEncrypted) throw console.warn("No bot wallet private key defined");
   const { rpc, paymentToken } = getPayoutConfigByNetworkId(evmNetworkId);
   const { privateKey } = await decryptKeys(evmPrivateEncrypted);

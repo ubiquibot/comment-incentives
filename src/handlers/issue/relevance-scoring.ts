@@ -151,7 +151,7 @@ interface InEachRequestParams {
 
 function filterSamples(batchResults: number[][], correctLength: number) {
   return batchResults.filter((batchResult) => {
-    if(!batchResult) return [];
+    if (!batchResult) return [];
     const filtered = batchResult.filter((score) => score >= 0 && score <= 1);
     if (filtered.length == correctLength) {
       return filtered;
