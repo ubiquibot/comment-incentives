@@ -1,5 +1,6 @@
 import { OpenAI } from "openai";
-
+import { config } from "dotenv";
+config();
 export function checkEnvironmentVariables() {
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
   if (!OPENAI_API_KEY) {
@@ -14,9 +15,6 @@ export function checkEnvironmentVariables() {
   const SUPABASE_KEY = process.env.SUPABASE_KEY;
   if (!SUPABASE_KEY) {
     throw new Error("SUPABASE_KEY not set");
-  }
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error("OPENAI_API_KEY is not set");
   }
 
   // Use environment variables or other secure means to store these values
