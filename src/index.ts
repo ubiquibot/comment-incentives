@@ -11,7 +11,7 @@ import { generateInstallationAccessToken } from "./utils/generate-access-token";
 import { generateConfiguration } from "./utils/generate-configuration";
 import { BotConfig } from "./types/configuration-types";
 
-async function getAuthenticatedOctokit() {
+export async function getAuthenticatedOctokit(): Promise<Octokit> {
   const { appId, privateKey } = checkEnvironmentVariables();
   const webhookPayload = github.context.payload;
   const inputs = webhookPayload.inputs as DelegatedComputeInputs; //as ExampleInputs;
@@ -45,7 +45,7 @@ getAuthenticatedOctokit()
     core.setFailed(error);
   });
 
-interface DelegatedComputeInputs {
+export interface DelegatedComputeInputs {
   eventName: GitHubEvent;
   issueOwner: string;
   issueRepository: string;
@@ -70,7 +70,7 @@ async function run(authenticatedOctokit: Octokit) {
   }
 }
 
-async function issueClosedEventHandler(
+export async function issueClosedEventHandler(
   supabaseClient: SupabaseClient,
   openAi: OpenAI,
   authenticatedOctokit: Octokit,
