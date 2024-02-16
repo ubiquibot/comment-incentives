@@ -20,8 +20,8 @@ export async function generatePermits(
   supabase: SupabaseClient
 ) {
   const { html: comment, allTxs } = await generateComment(totals, issue, config, supabase);
-  console.trace({ totals });
-  const metadata = structuredMetadata.create("Transactions", { allTxs, totals });
+
+  const metadata = structuredMetadata.create("Transactions", allTxs);
   return comment.concat("\n", metadata);
 }
 
