@@ -9,8 +9,8 @@ afterEach(() => {
 const inputs: DelegatedComputeInputs = {
   eventName: "issues.closed" as GitHubEvent.ISSUES_CLOSED,
   issueOwner: "ubiquibot",
-  issueRepository: "comment-incentives",
-  issueNumber: "19",
+  issueRepository: "production",
+  issueNumber: "84",
   collaborators: `["pavlovcik"]`,
   installationId: "37627918", // "ubiquibot-dev" app
 };
@@ -19,8 +19,8 @@ jest.mock("@actions/github", () => {
   const inputs: DelegatedComputeInputs = {
     eventName: "issues.closed" as GitHubEvent.ISSUES_CLOSED,
     issueOwner: "ubiquibot",
-    issueRepository: "comment-incentives",
-    issueNumber: "19",
+    issueRepository: "production",
+    issueNumber: "84",
     collaborators: `["pavlovcik"]`,
     installationId: "37627918", // "ubiquibot-dev" app
   };
@@ -45,13 +45,12 @@ export async function indexTest() {
   const timestamp = new Date().getTime();
   const logFilePath = path.join(__dirname, `${timestamp}.html`);
 
-  fs.writeFile(logFilePath, output, (err) => {
-    if (err) {
-      console.error("Error writing file", err);
-    } else {
-      console.log(`Output written to ${timestamp}.html`);
-    }
-  });
+  try {
+    await fs.promises.writeFile(logFilePath, output);
+    console.log(`Output written to ${timestamp}.html`);
+  } catch (err) {
+    console.error("Error writing file", err);
+  }
 }
 
 it(
