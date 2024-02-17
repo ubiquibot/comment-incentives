@@ -43,7 +43,9 @@ export async function indexTest() {
   const output = await issueClosedEventHandler(supabaseClient, openAi, authenticatedOctokit, inputs);
 
   const timestamp = new Date().getTime();
-  const logFilePath = path.join(__dirname, `${timestamp}.html`);
+  const logFilePath = path.join(__dirname, `..`, `test-results`, `${timestamp}.html`);
+  // Ensure the directory exists
+  fs.promises.mkdir(path.dirname(logFilePath), { recursive: true }).catch(console.error);
 
   try {
     await fs.promises.writeFile(logFilePath, output);
