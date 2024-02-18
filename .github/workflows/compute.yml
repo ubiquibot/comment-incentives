@@ -3,22 +3,16 @@ on:
   workflow_dispatch:
     inputs:
       eventName:
-        description: "Event ID"
+        description: "Event name"
         required: true
-      issueOwner:
-        description: "Organization that owns the repo"
-        required: true
-      issueRepository:
-        description: "Repository name"
-        required: true
-      issueNumber:
-        description: "Issue number"
-        required: true
-      collaborators:
-        description: "Repository collaborators"
+      event:
+        description: "Event payload"
         required: true
       installationId:
         description: "Installation ID"
+        required: true
+      settings:
+        description: "Plugin settings"
         required: true
 
 jobs:

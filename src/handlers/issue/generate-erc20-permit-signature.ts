@@ -3,20 +3,17 @@ import Decimal from "decimal.js";
 import { BigNumber, ethers } from "ethers";
 import { keccak256, toUtf8Bytes } from "ethers/lib/utils";
 import { getPayoutConfigByNetworkId } from "../../helpers/payout";
-import { BotConfig } from "../../types/configuration-types";
 import { decryptKeys } from "../../utils/private";
+import { PluginSettings } from "../..";
 
 export async function generateErc20PermitSignature({
   beneficiary,
   amount,
   issueId,
   userId,
-  config,
+  settings,
 }: GenerateErc20PermitSignatureParams) {
-  const {
-    payments: { evmNetworkId },
-    keys: { evmPrivateEncrypted },
-  } = config;
+  const { evmNetworkId, evmPrivateEncrypted } = settings;
 
   if (!evmPrivateEncrypted) throw console.warn("No bot wallet private key defined");
   const { rpc, paymentToken } = getPayoutConfigByNetworkId(evmNetworkId);
@@ -88,7 +85,7 @@ interface GenerateErc20PermitSignatureParams {
 
   issueId: string;
   userId: string;
-  config: BotConfig;
+  settings: PluginSettings;
 }
 
 interface Erc20PermitTransactionData {
