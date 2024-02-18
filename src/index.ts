@@ -3,55 +3,26 @@ import * as github from "@actions/github";
 import { Octokit } from "@octokit/rest";
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import { checkEnvironmentVariables } from "./check-env";
+import { getEnvironmentVariables } from "./check-env";
 import { issueClosed } from "./handlers/issue/issue-closed";
 import { getLinkedPullRequests } from "./helpers/get-linked-issues-and-pull-requests";
 import { GitHubComment, GitHubEvent, GitHubIssue, GitHubUser } from "./types/payload";
-import { generateInstallationAccessToken } from "./utils/generate-access-token";
 import { EmitterWebhookEvent as GithubWebhookEvent } from "@octokit/webhooks";
 
-export async function getAuthenticatedOctokit(): Promise<Octokit> {
-  const { appId, privateKey } = checkEnvironmentVariables();
-  const webhookPayload = github.context.payload;
-  const inputs = webhookPayload.inputs as DelegatedComputeInputs; //as ExampleInputs;
-  const originRepositoryAuthenticationToken = await generateInstallationAccessToken(
-    appId,
-    privateKey,
-    inputs.installationId
-  );
-  const authenticatedOctokit = new Octokit({ auth: originRepositoryAuthenticationToken });
-  return authenticatedOctokit;
-}
-
-async function postAuthenticatedRunResult(result: string) {
-  const octokit = await getAuthenticatedOctokit();
-  const inputs = github.context.payload.inputs as DelegatedComputeInputs;
-
-  const owner = inputs.event.payload.repository.owner.login;
-  const repository = inputs.event.payload.repository.name;
-  const issueNumber = Number(inputs.event.payload.issue.number);
-  return await octokit.rest.issues.createComment({
-    owner,
-    repo: repository,
-    issue_number: issueNumber,
-    body: result,
-  });
-}
-
-getAuthenticatedOctokit()
-  .then(run)
-  .then(postAuthenticatedRunResult)
+run()
   .then((result) => core.setOutput("result", result))
   .catch((error) => {
     console.error(error);
     core.setFailed(error);
   });
 
+type SupportedEvents = "issues.closed";
+
 export interface DelegatedComputeInputs {
-  eventName: "issues.closed";
-  event: GithubWebhookEvent<"issues.closed">;
+  eventName: SupportedEvents;
+  event: GithubWebhookEvent<SupportedEvents>;
   settings: PluginSettings;
-  installationId: string;
+  authToken: string;
 }
 
 export interface PluginSettings {
@@ -60,23 +31,35 @@ export interface PluginSettings {
   evmPrivateEncrypted: string;
 }
 
-async function run(authenticatedOctokit: Octokit) {
-  const { SUPABASE_URL, SUPABASE_KEY, openAi } = checkEnvironmentVariables();
+async function run() {
+  const { SUPABASE_URL, SUPABASE_KEY, openAi } = getEnvironmentVariables();
   const webhookPayload = github.context.payload;
   const inputs: DelegatedComputeInputs = {
     eventName: webhookPayload.eventName,
     event: JSON.parse(webhookPayload.event),
     settings: JSON.parse(webhookPayload.settings),
-    installationId: webhookPayload.installationId,
+    authToken: webhookPayload.authToken,
   };
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const octokit = new Octokit({ auth: inputs.authToken });
 
   const eventName = inputs.eventName;
+  let result: string;
+
   if (GitHubEvent.ISSUES_CLOSED === eventName) {
-    return await issueClosedEventHandler(supabaseClient, openAi, authenticatedOctokit, inputs);
+    result = await issueClosedEventHandler(supabaseClient, openAi, octokit, inputs);
   } else {
     throw new Error(`Event ${eventName} is not supported`);
   }
+
+  await octokit.rest.issues.createComment({
+    owner: inputs.event.payload.repository.owner.login,
+    repo: inputs.event.payload.repository.name,
+    issue_number: inputs.event.payload.issue.number,
+    body: result,
+  });
+
+  return result;
 }
 
 export async function issueClosedEventHandler(

@@ -1,8 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
-import { checkEnvironmentVariables } from "./check-env";
+import { getEnvironmentVariables } from "./check-env";
 import { DelegatedComputeInputs, getAuthenticatedOctokit, issueClosedEventHandler } from "./index";
 import { GitHubEvent } from "./types/payload";
-const { SUPABASE_URL, SUPABASE_KEY, openAi } = checkEnvironmentVariables();
+const { SUPABASE_URL, SUPABASE_KEY, openAi } = getEnvironmentVariables();
 afterEach(() => {
   jest.resetAllMocks();
 });
