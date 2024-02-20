@@ -186,7 +186,8 @@ function generateContributionsOverview(userScoreDetails: TotalsById, issue: GitH
           newRow(
             "Issue",
             "Task",
-            issue.assignees.length === 0 ? "-" : `${(1 / issue.assignees.length).toFixed(2)}`,
+            // Converting the division to Number() to avoid trailing zeroes
+            issue.assignees.length === 0 ? "-" : `${Number((1 / issue.assignees.length).toFixed(2))}`,
             task?.toString() || "-"
           )
         );
