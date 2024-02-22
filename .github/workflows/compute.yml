@@ -8,25 +8,33 @@ on:
       event:
         description: "Event payload"
         required: true
-      installationId:
-        description: "Installation ID"
+      authToken:
+        description: "Authentication token"
         required: true
       settings:
         description: "Plugin settings"
         required: true
+      ref:
+        description: "Branch name, tag name, or commit SHA"
+        required: false
 
 jobs:
   handler-job:
     runs-on: ubuntu-latest
     steps:
-      - name: print event name
+      - name: Event name
         run: echo ${{ inputs.eventName }}
+
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: "20.10.0"
+
       - name: Calling action
         uses: ./ # Uses an action in the root directory
         id: callback
