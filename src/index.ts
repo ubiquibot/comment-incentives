@@ -34,6 +34,12 @@ export interface PluginSettings {
 async function run() {
   const { SUPABASE_URL, SUPABASE_KEY, openAi } = getEnvironmentVariables();
   const webhookPayload = github.context.payload;
+  console.log({
+    eventName: webhookPayload.eventName,
+    event: webhookPayload.event,
+    settings: webhookPayload.settings,
+    authToken: webhookPayload.authToken ? "REDACTED" : "undefined",
+  });
   const inputs: DelegatedComputeInputs = {
     eventName: webhookPayload.eventName,
     event: JSON.parse(webhookPayload.event),
