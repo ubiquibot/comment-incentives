@@ -9,28 +9,30 @@ import { generateErc20PermitSignature } from "./generate-erc20-permit-signature"
 import { UserScoreTotals } from "./issue-shared-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { generateErc721PermitSignature } from "./generate-erc721-permit-signature";
-import { BotConfig } from "../../types/configuration-types";
+import { PluginSettings } from "../..";
 
 type TotalsById = { [userId: string]: UserScoreTotals };
 
 export async function generatePermits(
   totals: TotalsById,
   issue: GitHubIssue,
-  config: BotConfig,
+  settings: PluginSettings,
   supabase: SupabaseClient
 ) {
-  const { html: comment, allTxs } = await generateComment(totals, issue, config, supabase);
+  const { html: comment, allTxs } = await generateComment(totals, issue, settings, supabase);
 
   const metadata = structuredMetadata.create("Transactions", allTxs);
   return comment.concat("\n", metadata);
 }
 
-async function generateComment(totals: TotalsById, issue: GitHubIssue, config: BotConfig, supabase: SupabaseClient) {
-  const {
-    features: { isNftRewardEnabled },
-    payments: { evmNetworkId },
-  } = config;
-  const { rpc, paymentToken } = getPayoutConfigByNetworkId(config.payments.evmNetworkId);
+async function generateComment(
+  totals: TotalsById,
+  issue: GitHubIssue,
+  settings: PluginSettings,
+  supabase: SupabaseClient
+) {
+  const { evmNetworkId, isNftRewardEnabled } = settings;
+  const { rpc, paymentToken } = getPayoutConfigByNetworkId(evmNetworkId);
 
   const tokenSymbol = await getTokenSymbol(paymentToken, rpc);
   const htmlArray = [] as string[];
@@ -61,7 +63,7 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
       amount: tokenAmount,
       issueId: issue.node_id,
       userId: userTotals.user.node_id,
-      config,
+      settings,
     });
     erc20Permits.push(permit);
     allTxs.push(permit);
