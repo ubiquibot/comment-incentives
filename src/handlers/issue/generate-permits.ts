@@ -88,6 +88,27 @@ async function generateComment(totals: TotalsById, issue: GitHubIssue, config: B
       ...erc20Permits.map((permit) => ({ type: "erc20-permit", ...permit })),
       ...erc721Permits.map((nftMint) => ({ type: "erc721-permit", ...nftMint })),
     ];
+
+    const { error: insertError } = await supabase.from("permits").insert(
+      [
+        erc20Permits.map((claim) => ({
+          amount: claim.permit.permitted.amount,
+          nonce: claim.permit.nonce,
+          deadline: claim.permit.deadline,
+          signature: claim.signature,
+          beneficiary_id: parseInt(userId),
+        })),
+        erc721Permits.map((claim) => ({
+          amount: "1",
+          nonce: claim.request.nonce,
+          deadline: claim.request.deadline,
+          signature: claim.signature,
+          beneficiary_id: parseInt(userId),
+        })),
+      ].flat()
+    );
+    if (insertError) throw insertError;
+
     const base64encodedClaimData = Buffer.from(JSON.stringify(claimData)).toString("base64");
     const claimUrl = new URL("https://pay.ubq.fi/");
     claimUrl.searchParams.append("claim", base64encodedClaimData);
