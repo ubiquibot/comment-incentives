@@ -159,10 +159,17 @@ export class CommentScoring {
   ): (typeof CommentScoring.prototype.commentScores)[number]["details"][number]["wordScoreCommentDetails"] {
     const wordScoreCommentDetails: { [key: string]: Decimal } = {};
 
+    const builtIns = new Set(
+      Object.getOwnPropertyNames(Object.prototype).filter((name) => typeof Object.prototype[name] === "function")
+    );
+
     for (const word of words) {
-      let counter = wordScoreCommentDetails[word] || ZERO;
-      counter = counter.plus(this.roleWordScore);
-      wordScoreCommentDetails[word] = counter;
+      if (!builtIns.has(word)) {
+        let counter = wordScoreCommentDetails[word] || ZERO;
+        counter = counter.plus(this.roleWordScore);
+
+        wordScoreCommentDetails[word] = counter;
+      }
     }
 
     return wordScoreCommentDetails;

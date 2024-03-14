@@ -16,7 +16,7 @@ export async function generateConfiguration(
   const orgConfig = parseYaml(
     await download({
       repository: UBIQUIBOT_CONFIG_REPOSITORY,
-      owner: owner,
+      owner,
       authenticatedOctokit,
     })
   );
