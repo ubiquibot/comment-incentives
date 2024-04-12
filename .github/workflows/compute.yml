@@ -3,47 +3,48 @@ on:
   workflow_dispatch:
     inputs:
       eventName:
-        description: "Event ID"
+        description: "Event name"
         required: true
-      issueOwner:
-        description: "Organization that owns the repo"
+      event:
+        description: "Event payload"
         required: true
-      issueRepository:
-        description: "Repository name"
+      authToken:
+        description: "Authentication token"
         required: true
-      issueNumber:
-        description: "Issue number"
+      settings:
+        description: "Plugin settings"
         required: true
-      collaborators:
-        description: "Repository collaborators"
-        required: true
-      installationId:
-        description: "Installation ID"
-        required: true
+      ref:
+        description: "Branch name, tag name, or commit SHA"
+        required: false
 
 jobs:
   handler-job:
     runs-on: ubuntu-latest
     steps:
-      - name: print event name
+      - name: Event name
         run: echo ${{ inputs.eventName }}
+
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: "20.10.0"
+          node-version: "20"
+          cache: "yarn"
+
       - name: Calling action
         uses: ./ # Uses an action in the root directory
         id: callback
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           X25519_PRIVATE_KEY: ${{ secrets.X25519_PRIVATE_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NFT_MINTER_PRIVATE_KEY: ${{ secrets.NFT_MINTER_PRIVATE_KEY }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          UBIQUIBOT_APP_ID: ${{ secrets.UBIQUIBOT_APP_ID }}
-          UBIQUIBOT_APP_PRIVATE_KEY: ${{ secrets.UBIQUIBOT_APP_PRIVATE_KEY }}
 
       # - name: Get Bot Token
       #   uses: tibdex/github-app-token@v1.7.0
