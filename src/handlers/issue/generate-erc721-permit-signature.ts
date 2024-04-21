@@ -1,7 +1,9 @@
-import { BigNumber, ethers, utils } from "ethers";
+import { BigNumber, ethers, Wallet, utils } from "ethers";
 import { getPayoutConfigByNetworkId } from "../../helpers/payout";
 import { MaxUint256 } from "@uniswap/permit2-sdk";
 import { keccak256, toUtf8Bytes } from "ethers/lib/utils";
+import { retryAsync, retryAsyncUntilDefined } from "ts-retry";
+import { JsonRpcProvider } from "@ethersproject/providers";
 
 const NFT_MINTER_PRIVATE_KEY = process.env.NFT_MINTER_PRIVATE_KEY as string;
 const NFT_CONTRACT_ADDRESS = "0x6a87f05a74AB2EC25D1Eea0a3Cd24C3A2eCfF3E0";
@@ -73,19 +75,15 @@ export async function generateErc721PermitSignature({
 }: GenerateErc721PermitSignatureParams) {
   const { rpc } = getPayoutConfigByNetworkId(networkId);
 
-  let provider;
-  let adminWallet;
-  try {
-    provider = new ethers.providers.JsonRpcProvider(rpc);
-  } catch (error) {
-    throw console.error("Failed to instantiate provider", error);
-  }
+  const provider = await retryAsyncUntilDefined<JsonRpcProvider>(
+    async () => new ethers.providers.JsonRpcProvider(rpc),
+    { delay: 1000, maxTry: 5 }
+  );
 
-  try {
-    adminWallet = new ethers.Wallet(NFT_MINTER_PRIVATE_KEY, provider);
-  } catch (error) {
-    throw console.error("Failed to instantiate wallet", error);
-  }
+  const adminWallet = await retryAsync<Wallet>(
+    async () => new ethers.Wallet(NFT_MINTER_PRIVATE_KEY, provider),
+    { delay: 1000, maxTry: 5 }
+  );
 
   const erc721SignatureData: Erc721PermitSignatureData = {
     beneficiary: beneficiary,
@@ -95,20 +93,19 @@ export async function generateErc721PermitSignature({
     values: [organizationName, repositoryName, issueNumber, username, contributionType],
   };
 
-  const signature = await adminWallet
-    ._signTypedData(
-      {
-        name: SIGNING_DOMAIN_NAME,
-        version: SIGNING_DOMAIN_VERSION,
-        verifyingContract: NFT_CONTRACT_ADDRESS,
-        chainId: networkId,
-      },
-      types,
-      erc721SignatureData
-    )
-    .catch((error) => {
-      throw console.error("Failed to sign typed data", error);
-    });
+  const signature = await retryAsync<string>(
+      async () => await adminWallet._signTypedData(
+        {
+          name: SIGNING_DOMAIN_NAME,
+          version: SIGNING_DOMAIN_VERSION,
+          verifyingContract: NFT_CONTRACT_ADDRESS,
+          chainId: networkId,
+        },
+        types,
+        erc721SignatureData
+      ),
+      { delay: 1000, maxTry: 5 }
+    );
 
   const nftMetadata: Record<string, string> = {};
 

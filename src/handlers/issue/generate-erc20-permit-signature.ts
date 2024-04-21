@@ -1,10 +1,12 @@
 import { MaxUint256, PERMIT2_ADDRESS, PermitTransferFrom, SignatureTransfer } from "@uniswap/permit2-sdk";
 import Decimal from "decimal.js";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber, Wallet, ethers } from "ethers";
 import { keccak256, toUtf8Bytes } from "ethers/lib/utils";
 import { getPayoutConfigByNetworkId } from "../../helpers/payout";
 import { BotConfig } from "../../types/configuration-types";
 import { decryptKeys } from "../../utils/private";
+import { retryAsync, retryAsyncUntilDefined } from "ts-retry";
+import { JsonRpcProvider } from "@ethersproject/providers";
 
 export async function generateErc20PermitSignature({
   beneficiary,
@@ -26,19 +28,15 @@ export async function generateErc20PermitSignature({
   if (!privateKey) throw console.error("Private key is not defined");
   if (!paymentToken) throw console.error("Payment token is not defined");
 
-  let provider;
-  let adminWallet;
-  try {
-    provider = new ethers.providers.JsonRpcProvider(rpc);
-  } catch (error) {
-    throw console.debug("Failed to instantiate provider", error);
-  }
+  const provider = await retryAsyncUntilDefined<JsonRpcProvider>(
+    async () => new ethers.providers.JsonRpcProvider(rpc),
+    { delay: 1000, maxTry: 5 }
+  );
 
-  try {
-    adminWallet = new ethers.Wallet(privateKey, provider);
-  } catch (error) {
-    throw console.debug("Failed to instantiate wallet", error);
-  }
+  const adminWallet = await retryAsync<Wallet>(
+    async () => new ethers.Wallet(privateKey, provider),
+    { delay: 1000, maxTry: 5 }
+  );
 
   const permitTransferFromData: PermitTransferFrom = {
     permitted: {
@@ -56,9 +54,10 @@ export async function generateErc20PermitSignature({
     evmNetworkId
   );
 
-  const signature = await adminWallet._signTypedData(domain, types, values).catch((error) => {
-    throw console.debug("Failed to sign typed data", error);
-  });
+  const signature = await retryAsync<string>(
+    async () => await adminWallet._signTypedData(domain, types, values),
+    { delay: 1000, maxTry: 5 }
+  );
 
   const transactionData: Erc20PermitTransactionData = {
     permit: {
