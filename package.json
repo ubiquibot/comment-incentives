@@ -17,6 +17,7 @@
     "@actions/github": "^6.0.0",
     "@commitlint/cli": "^18.4.3",
     "@commitlint/config-conventional": "^18.4.3",
+    "@keyrxng/rpc-handler": "^1.0.3",
     "@octokit/rest": "^20.0.2",
     "@openzeppelin/contracts": "^5.0.0",
     "@sinclair/typebox": "^0.31.20",

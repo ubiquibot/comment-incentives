@@ -3,6 +3,7 @@ import Decimal from "decimal.js";
 import { BigNumber, Wallet, ethers } from "ethers";
 import { keccak256, toUtf8Bytes } from "ethers/lib/utils";
 import { getPayoutConfigByNetworkId } from "../../helpers/payout";
+import { useHandler } from "../../helpers/rpc-handler";
 import { BotConfig } from "../../types/configuration-types";
 import { decryptKeys } from "../../utils/private";
 import { retryAsync, retryAsyncUntilDefined } from "ts-retry";
@@ -22,20 +23,24 @@ export async function generateErc20PermitSignature({
 
   if (!evmPrivateEncrypted) throw console.warn("No bot wallet private key defined");
   const { rpc, paymentToken } = getPayoutConfigByNetworkId(evmNetworkId);
+  const rpcHandler = useHandler(evmNetworkId);
   const { privateKey } = await decryptKeys(evmPrivateEncrypted);
 
   if (!rpc) throw console.error("RPC is not defined");
   if (!privateKey) throw console.error("Private key is not defined");
   if (!paymentToken) throw console.error("Payment token is not defined");
 
-  const provider = await retryAsyncUntilDefined<JsonRpcProvider>(
+  let provider = await retryAsyncUntilDefined<JsonRpcProvider>(
     async () => new ethers.providers.JsonRpcProvider(rpc),
-    { delay: 1000, maxTry: 5 }
+    { maxTry: 5 }
   );
 
   const adminWallet = await retryAsync<Wallet>(
     async () => new ethers.Wallet(privateKey, provider),
-    { delay: 1000, maxTry: 5 }
+    {
+      maxTry: 5,
+      onError: async () => provider = await rpcHandler.getFastestRpcProvider()
+    }
   );
 
   const permitTransferFromData: PermitTransferFrom = {
@@ -56,7 +61,10 @@ export async function generateErc20PermitSignature({
 
   const signature = await retryAsync<string>(
     async () => await adminWallet._signTypedData(domain, types, values),
-    { delay: 1000, maxTry: 5 }
+    {
+      maxTry: 5,
+      onError: async () => provider = await rpcHandler.getFastestRpcProvider()
+    }
   );
 
   const transactionData: Erc20PermitTransactionData = {

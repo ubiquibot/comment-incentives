@@ -1,5 +1,6 @@
 import { BigNumber, ethers, Wallet, utils } from "ethers";
 import { getPayoutConfigByNetworkId } from "../../helpers/payout";
+import { useHandler } from "../../helpers/rpc-handler";
 import { MaxUint256 } from "@uniswap/permit2-sdk";
 import { keccak256, toUtf8Bytes } from "ethers/lib/utils";
 import { retryAsync, retryAsyncUntilDefined } from "ts-retry";
@@ -74,15 +75,19 @@ export async function generateErc721PermitSignature({
   contributionType,
 }: GenerateErc721PermitSignatureParams) {
   const { rpc } = getPayoutConfigByNetworkId(networkId);
+  const rpcHandler = useHandler(networkId);
 
-  const provider = await retryAsyncUntilDefined<JsonRpcProvider>(
+  let provider = await retryAsyncUntilDefined<JsonRpcProvider>(
     async () => new ethers.providers.JsonRpcProvider(rpc),
-    { delay: 1000, maxTry: 5 }
+    { maxTry: 5 }
   );
 
   const adminWallet = await retryAsync<Wallet>(
     async () => new ethers.Wallet(NFT_MINTER_PRIVATE_KEY, provider),
-    { delay: 1000, maxTry: 5 }
+    {
+      maxTry: 5,
+      onError: async () => provider = await rpcHandler.getFastestRpcProvider()
+    }
   );
 
   const erc721SignatureData: Erc721PermitSignatureData = {
@@ -104,7 +109,10 @@ export async function generateErc721PermitSignature({
         types,
         erc721SignatureData
       ),
-      { delay: 1000, maxTry: 5 }
+      {
+        maxTry: 5,
+        onError: async () => provider = await rpcHandler.getFastestRpcProvider()
+      }
     );
 
   const nftMetadata: Record<string, string> = {};
