@@ -242,7 +242,9 @@ function generateDetailsTable(totals: TotalsById) {
         const commentScore = commentScores[index];
 
         const commentUrl = commentSource.comment.html_url;
-        const truncatedBody = commentSource ? commentSource.comment.body.substring(0, 64).concat("...") : "";
+        const truncatedBody = commentSource
+          ? commentSource.comment.body.replaceAll("<", "&lt;").replaceAll(">", "&gt;").substring(0, 64).concat("...")
+          : "";
         const formatScoreDetails = commentScore.formatScoreCommentDetails;
 
         let formatDetailsStr = "";
