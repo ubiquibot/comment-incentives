@@ -243,7 +243,13 @@ function generateDetailsTable(totals: TotalsById) {
 
         const commentUrl = commentSource.comment.html_url;
         const truncatedBody = commentSource
-          ? commentSource.comment.body.replaceAll("<", "&lt;").replaceAll(">", "&gt;").substring(0, 64).concat("...")
+          ? commentSource.comment.body
+              .replaceAll("&", "&amp;")
+              .replaceAll("<", "&lt;")
+              .replaceAll(">", "&gt;")
+              .replaceAll("`", "&#96;")
+              .substring(0, 64)
+              .concat("...")
           : "";
         const formatScoreDetails = commentScore.formatScoreCommentDetails;
 
