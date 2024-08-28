@@ -2,7 +2,7 @@ import { RPCHandler, HandlerConstructorConfig, NetworkId } from "@ubiquity-dao/r
 
 export function useHandler(networkId: number) {
   const config: HandlerConstructorConfig = {
-    networkId: networkId as unknown as NetworkId,
+    networkId: String(networkId) as NetworkId,
     networkName:  null,     // will default using the networkRpcs
     networkRpcs:  null,     // e.g "https://mainnet.infura.io/..."
     runtimeRpcs:  null,     // e.g "<networkId>__https://mainnet.infura.io/..." > "1__https://mainnet.infura.io/..."
