@@ -1,3 +1,6 @@
+> [!WARNING]  
+> This repository has been archived in favor of https://github.com/ubiquibot/conversation-rewards
+
 # @ubiquibot/comment-incentives
 
 This document outlines the setup for the UbiquiBot comment incentives system, a serverless function hosted by GitHub Actions.
